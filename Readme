@@ -1,0 +1,25 @@
+File Description
+Feature_Extract.R - contains all the necessary function for extracting the raw expression data and storing them into a matrix of standard form. All map information  patient and file ids.
+
+extract_stage.R
+
+finding_deg.R
+
+get_features.R - Uses Feature_Extract to extract features for counts and fpqm 
+
+gen_ext.R
+
+onlytumors.R
+
+sample_info.R
+
+Visualisation.R
+
+##Environment Variables and proj variables
+##Working for papillary
+exp_prof - Expression matrix corresponding to raw counts
+exp_fpqm - Expression matrix corresponding to fpqm-ql values
+ens.ids.all - All ens ids in file matrix
+ens.ids - ens ids corresponding to protein coding regions
+genes.entrez - mapping between ens.ids and genes.entrez
+sample.file.map - mapping between count files and patient ids

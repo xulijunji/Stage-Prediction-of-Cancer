@@ -33,6 +33,16 @@ tumor.exp.varSelRF <- varSelRF(xdata = exp_prof_tumor_reported, Class = stages.l
 tumor.exp.boot <- varSelRFBoot(exp_prof_tumor_reported, stages.levels, bootnumber = 10, usingCluster = T,
                                 TheCluster = cl, srf= tumor.exp.varSelRF)
 
+tumor.fpqm.comb.varSelRF <- varSelRF(xdata = exp_fpqm_tumor_reported, Class = stages.levels.comb, 
+                                     keep.forest = T)
+tumor.fpqm.comb.boot <- varSelRFBoot(exp_fpqm_tumor_reported, stages.levels.comb, bootnumber = 10, usingCluster = T,
+                                     TheCluster = cl, srf= tumor.fpqm.comb.varSelRF)
+tumor.fpqm.log.comb.varSelRF <- varSelRF(xdata = exp_fpqm_log_tumor_reported, Class = stages.levels.comb, 
+                                         keep.forest = T)
+tumor.fpqm.log.comb.boot <- varSelRFBoot(exp_fpqm_log_tumor_reported, stages.levels.comb, bootnumber = 10, usingCluster = T,
+                                         TheCluster = cl, srf= tumor.fpqm.log.comb.varSelRF)
+
+
 stopCluster(cl)
 
 ####
@@ -92,3 +102,37 @@ tumor.fpqm.log.boot$number.of.vars
 tumor.exp.boot$overlap
 tumor.fpqm.boot$overlap
 tumor.fpqm.log.boot$overlap
+
+save(tumor.exp.boot, file = 'environment/varSelRF_exp_boot.RData')
+save(tumor.exp.varSelRF, file = 'environment/varSelRF_exp.RData')
+
+save(tumor.fpqm.log.boot, file = 'environment/varSelRF_fpqm_log_boot.RData')
+save(tumor.fpqm.log.varSelRF, file = 'environment/varSelRF_fpqk_log.RData')
+
+save(tumor.fpqm.boot, file = 'environment/varSelRF_fpqm_boot.RData')
+save(tumor.fpqm.varSelRF, file = 'environment/varSelRF_fpqm.RData')
+
+save(tumor.fpqm.log.comb.boot, file = 'environment/tumor_fpqm_log_comb_boot.RData')
+save(tumor.fpqm.log.comb.varSelRF, file = 'environment/tumor_fpqm_log_comb_varSelRF.RData')
+save(tumor.fpqm.comb.boot, file = 'environment/tumor_fpqm_comb_boot.RData')
+save(tumor.fpqm.comb.varSelRF, file = 'environment/tumor_fpqm_comb_varSelRF.RData')
+
+
+save(tumor.indexes, file = 'environment/tumor_indexes.RData')
+save(diff.ids, file = 'environment/diff_ids.RData') ##Used for tumor-control
+save(indexes.stages.reported, file = 'environment/indexes_stages_reported.RData') ##Contain indexes for 
+#which stage has been reported once the tumor.indexes are known
+
+save(exp_prof, file = 'environment/exp_prof.RData' )
+save(exp_fpqm, file = 'environment/exp_fpqm.RData' )
+
+
+###Combining Stages
+stages.levels.comb <- sapply(as.character(stages.levels), function(x)
+  {
+  if(x == 'stage i' || x == 'stage ii')
+    x = 'stage i'
+  else
+    x = 'stage iv'
+})
+save(stages.levels.comb, file = 'environment/stages.level.comb' )
