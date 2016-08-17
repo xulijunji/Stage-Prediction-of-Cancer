@@ -1,5 +1,9 @@
 library(rjson)
 library(dplyr)
+
+##Env variables - pap.comb, int.type.stage.indexes
+##Proj variables - pap.comb, int.type.stage.indexes
+
 pap.cli.json <- fromJSON(file = '~/Downloads/data/papillary/clinical.cart.2016-07-21T12-04-02.150390.json')
 
 pat_stages = lapply(seq_along(pap.cli.json), function(x)
@@ -13,6 +17,7 @@ names(pat_stages) = sapply(seq_along(pap.cli.json), function(x)
   })
 
 library('TCGAbiolinks')
+library(dplyr)
 query = TCGAquery_subtype('kirp')
 pap.sub = filter(query) %>% select(patient, tumor_type.KIRP.path.)
 length(intersect(pap.sub$patient, names(pat_stages)))
@@ -42,7 +47,7 @@ types.index = sapply(type, function(x)
 })
 names(types.index) = type
 
-int.indexes = sapply(types.index, function(x)
+int.type.stage.indexes = sapply(types.index, function(x)
 {
   sapply(stages.index, function(y)
     {
@@ -55,3 +60,8 @@ int.indexes.df = data.frame(type1 = c(int.indexes[5], int.indexes[6], int.indexe
 length(which(pap.comb$stage == 'not reported'))
 a = unique(pap.comb$type)
 length(which(pap.comb$type ==a[2]))
+
+remove(a,types.index,stages.index, query, pap.sub, ind.comb, pap.cli.json, type)
+
+save(pap.comb, file = 'environment/pap_comb_stage_type.RData')
+save(int.type.stage.indexes, file = 'environment/pap_int_type_stage_indexes.RData')

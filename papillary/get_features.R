@@ -1,6 +1,6 @@
 ###Using Feature_Extract
 ##Env variables saved exp_prof, exp_fpqm
-##Proj variables - genes.entrez, sample.file.map, ens.ids, ens.id.all
+##Proj variables - genes.entrez, sample.file.map, ens.ids, ens.ids.all
 
 ##mRNA_counts
 wd = '~/Downloads/data/papillary'
