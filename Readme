@@ -1,7 +1,7 @@
 File Description
-Feature_Extract.R - contains all the necessary function for extracting the raw expression data and storing them into a matrix of standard form. All map information  patient and file ids.
+Feature_Extract.R - contains all the necessary function for extracting the raw expression data and storing them into a matrix of standard form. Also map information  patient and file ids.
 
-extract_stage.R - Giving a data frame that combines stage and type wise information
+extract_stage.R - Returning a data frame that combines stage and type wise information
 
 finding_deg.R
 
@@ -9,7 +9,9 @@ get_features.R - Uses Feature_Extract to extract features for counts and fpqm
 
 gen_ext.R
 
-onlytumors.R
+onlytumors.R - creates data frames/dds objects for only tumor samples of exp_prof,exp_fpqm/log
+Also separates them into only those for which we stage data.
+Uses function.R and it is in this files we call functions and save images for visualisation
 
 sample_info.R
 

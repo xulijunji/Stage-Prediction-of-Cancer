@@ -9,6 +9,8 @@ replace.symbol <- function(sym.list, replace.with, to.replace)
 
 get.imp.genes <- function(method, assay, number)
 {
+  if(typeof(assay) == 'S4')
+    assay = assay(assay)
   if(method == 1) ###most expression
     return(order(rowMeans(assay), decreasing = T)[1:number])
   else if(method == 2)
@@ -19,38 +21,42 @@ get.imp.genes <- function(method, assay, number)
   else if(method == 3)
   {
     library(matrixStats)
+    print(typeof(assay))
     rv <- rowVars(assay)
     return(order(rv, decreasing=TRUE)[1:number])
   }
     
 }
 
-create.list.imp.genes <- function(df.list, method, number)
+create.list.imp.genes <- function(df.list, number)
 {
   top.genes = list()
-  top.genes[['rld']] = get.imp.genes(method, assay(df.list[['rld']]), number)
-  top.genes[['nt']] = get.imp.genes(1, assay(df.list[['nt']]), number)
-  top.genes[['vs']] = get.imp.genes(1, assay(df.list[['vs']]), number)
-  top.genes[['fpqm']] = get.imp.genes(1, df.list[['fpqm']], number)
-  top.genes[['fpqm_log']] = get.imp.genes(1, df.list[['fpqm_log']], number)
+  for(i in seq_along(df.list))
+    top.genes[[names(df.list)[i]]] = get.list.imp.genes(df.list[[i]], c(1,2,3), number)
   return(top.genes)
   
 }
 
+get.list.imp.genes <- function(df.list, methods, number)
+{
+  list.imp.genes <- list()
+  for(i in methods)
+    list.imp.genes[[i]] = get.imp.genes(i, df.list, number)
+  names(list.imp.genes) = c('exp', 'mad', 'var')
+  return(list.imp.genes)
+}
+
 ##Tweeked original multiplot and plotPCA functions
-multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+multiplot <- function(list.plots, plotlist=NULL, file, cols=1, layout=NULL) {
   library(grid)
   
   # Make a list from the ... arguments and plotlist
-  if(length(...) == 1)
-  {
-    print('aye')
-    plots <- c(list(...), plotlist)
-  }
-  else
-    plots <- c(..., plotlist)
-  #print(plots)
+  
+  plots <- c(list.plots, plotlist)
+  
+
   numPlots = length(plots)
+  #print(numPlots)
   
   # If layout is NULL, then use 'cols' to determine layout
   if (is.null(layout)) {
@@ -75,22 +81,18 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
       
       print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
-                                      layout.pos.col = matchidx$col))
+                                     layout.pos.col = matchidx$col))
     }
   }
 }
 
-plotPCA = function(object, intgroup="condition", ntop=500, returnData=FALSE, title, sample.info = NULL)
+plotPCA = function(object, intgroup, ntop=500, returnData=FALSE, title, colData = NULL)
 {
   library(ggplot2)
   library(matrixStats)
-  # calculate the variance for each gene
+  
   if(typeof(object) == 'S4')
   {
-    #rv <- rowVars(assay(object))
-  
-    # select the ntop genes by variance
-    #select <- order(rv, decreasing=TRUE)[seq_len(min(ntop, length(rv)))]
     
     # perform a PCA on the data in assay(x) for the selected genes
     pca <- prcomp(t(assay(object)))
@@ -122,17 +124,17 @@ plotPCA = function(object, intgroup="condition", ntop=500, returnData=FALSE, tit
     # the contribution to the total variance for each component
     percentVar <- pca$sdev^2 / sum( pca$sdev^2 )
     
-    if (!all(intgroup %in% names(sample.info))) {
+    if (!all(intgroup %in% names(colData))) {
       stop("the argument 'intgroup' should specify columns of colData(dds)")
     }
     
-    intgroup.df <- as.data.frame(sample.info[, intgroup, drop=FALSE])
+    intgroup.df <- as.data.frame(colData[, intgroup, drop=FALSE])
     
     # add the intgroup factors together to create a new grouping factor
     group <- if (length(intgroup) > 1) {
       factor(apply( intgroup.df, 1, paste, collapse=" : "))
     } else {
-      sample.info[[intgroup]]
+      colData[[intgroup]]
     }
   }
   
@@ -151,28 +153,119 @@ plotPCA = function(object, intgroup="condition", ntop=500, returnData=FALSE, tit
     coord_fixed() 
 }
 
-get.list.plotPCA <- function(arg, assay, gene.list, main_string, type = 1, sample.info = NULL, intgroup = 'type')
+get.list.plotPCA <- function(assay.list, gene.list, colData = NULL, intgroup = NULL)
 {
-  if(length(arg) == 0& length(gene.list) == 0)
-    li <-plotPCA(assay, intgroup = 'type', title = main_string)
-  else
+  ##arg - the indexes of list for differential genes and total number for others
+  ##assay.list - the list of assays/dfs for which each individual plot shall be made
+  ##gene.list - the vector containing the required genes for which we want to plot
+  ##colData - col_data of DESeq object to be used for non assay type objects
+  ##intrgroup - specifying the type of column in coldData to be used as basis of differentiation
+  
+  
+  ##gets the list of plotPCA based on different categories for a list of dfs for a list of genes
+  ##using get.list.plotPCA.df.gene
+  list.df.gene.pca <- list()
+  for(i in seq_along(gene.list[[1]]))
   {
+    print(i)
+    list.df.gene.pca[[names(gene.list[[1]])[i]]] = list()
+    for(j in seq_along(assay.list))
+    {
+      list.df.gene.pca[[names(gene.list[[1]])[i]]][[names(assay.list)[j]]]  =
+        get.list.plotPCA.df.gene(c(100,500,1000,2000,3000,4000,5000),assay.list[[j]], gene.list[[j]][[i]],
+                                 names(gene.list[[1]])[i], 2, colData, intgroup)  
+    }
+    
+  }
+  return(list.df.gene.pca)
+}
+
+get.list.plotPCA.gene <- function(arg, assay.list, gene.vec, main_string, type = 1, colData = NULL, intgroup = NULL)
+{
+  ##arg - the indexes of list for differential genes and total number for others
+  ##assay.list - the list of assays/dfs for which each individual plot shall be made
+  ##gene.vec - the vector containing the required genes for which we want to plot
+  ##main_string - Title to be shown on plot
+  ##type - 1 if we are using differential genes else 2 for all other genes
+  ##colData - col_data of DESeq object to be used for non assay type objects
+  ##intrgroup - specifying the type of column in coldData to be used as basis of differentiation
+  
+  ##gets the list of plotPCA based on different categories for a list of dfs for a given type of genes
+  ##using get.list.plotPCA.df.gene
+  
+  list.dfs.pca = lapply(assay.list, function(x)
+  {
+    get.list.plotPCA.df.gene(arg, x , gene.vec, main_string, type, colData, intgroup)
+  })
+  names(list.dfs.pca) = names(assay.list)
+  return(list.dfs.pca)
+}
+
+get.list.plotPCA.df.gene <- function(arg, assay, gene.list, main_string, type = 1, colData = NULL, intgroup = NULL)
+{
+  ##arg - the indexes of list for differential genes and total number for others
+  ##assay - the df for which plot shall be made
+  ##gene.list - the list containing the required genes for which we want to plot
+  ##main_string - Title to be shown on plot
+  ##type - 1 if we are using differential genes else 2 for all other genes
+  ##colData - col_data of DESeq object to be used for non assay type objects
+  ##intrgroup - specifying the type of column in coldData to be used as basis of differentiation
+  
+  ##gets the list of plotPCA based on different categories for a given df for a given type of genes
     if(type == 1)
     {
       li <- lapply(arg, function(x)
         {
+        #print(typeof(assay[gene.list[[x]],]))
+        #print(x)
         a = plotPCA(assay[gene.list[[x]],], intgroup = intgroup, 
-                title = paste(main_string,as.character(x), sep = '_'), sample.info = sample.info)})
+                title = paste(main_string,as.character(x), sep = '_'), colData = colData)
       
-        print(a)
+        })
+     
     }
     else if(type == 2)
     {
       li <- lapply(arg, function(x)
       {
         plotPCA(assay[gene.list[1:x],], intgroup = intgroup, 
-                title = paste(main_string,as.character(x), sep = '_'), sample.info = sample.info)})
+                title = paste(main_string,as.character(x), sep = '_'), colData = colData)})
     }
-      }
+  names(li) <- arg 
   return(li)
+}
+
+save.plots.main.wd <- function(image.direct.main, image.direct.type, list.plots, cols)
+{
+  ##image.direct.main - main working directory
+  ##image.direct.type - subdirectory for directory specific to the list working on
+  ##list.plots - list of lists that will be fed to multiplot
+  ##col - number of columns in multiplot
+  
+  ###saves the images of multiplots created on list of lists where the list of a list is fed to multiplot
+  for(i in seq_along(list.plots))
+  {
+    file = paste(image.direct.main, image.direct.type, 
+                 paste(names(list.plots)[i],'jpg', sep = '.'), sep = '/')
+    jpeg(file, width = 1000, heigh = 1000)
+    multiplot(list.plots[[i]], col = 2)
+    dev.off()
+    
+  }
+}
+
+save.plots.under.main.wd <- function(image.direct.main, names.image.direct.type, list.plots, names.cols)
+{
+  ##image.direct.main - main working directory
+  ##names.image.direct.type - subdirectory for directory specific to the list working on which will be 
+  ##created first and then the image will be saved to
+  ##list.plots - list for each criteria containing a list of lists that will be fed to multiplot
+  ##names.col - specifying the number of columns for each criteria
+  
+  ###loops through a list feeding it save.plots.main.wd function creating its directory
+  for(i in seq_along(list.plots))
+  {
+    dir.create(paste(image.direct.main, names.image.direct.type[i], sep = '/'))
+    save.plots.main.wd(image.direct.main, names.image.direct.type[i], list.plots[[names.image.direct.type[i]]], names.cols[i])
+  }
 }
