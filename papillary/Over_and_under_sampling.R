@@ -57,4 +57,4 @@ for(i in seq_along(new.indexes.oversamp))
   stages.oversamp[new.indexes.oversamp[[i]]] = names(new.indexes.oversamp)[i]
 }
 save(exp_fpqm_tumor_reported_over, file = 'environment/exp_fpqm_tumor_reported_over.RData')
-save(stages.oversamp, file = 'environment/stages.oversamp')
+save(stages.oversamp, file = 'environment/stages.oversamp.RData')

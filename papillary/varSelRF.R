@@ -2,46 +2,40 @@ install.packages('~/varSelRF_0.7-5.tar.gz', repos = NULL, type = 'source')
 library(varSelRF)
 library(snow)
 
-exp_fpqm_tumor_log <- log2(exp_fpqm_tumor+1)
+
 df.stages$sample.id == colnames(exp_fpqm_tumor)
-indexes.stages.reported <- which(df.stages$stage != 'not reported')
+
 stages.levels <- df.stages$stage[indexes.stages.reported]
 stages.levels <- droplevels(stages.levels)
 
-exp_fpqm_tumor_log_reported <- exp_fpqm_tumor_log[,indexes.stages.reported]
-exp_fpqm_tumor_log_reported <- t(exp_fpqm_tumor_log_reported)
-rownames(exp_fpqm_tumor_log_reported) <- df.stages$short.id[indexes.stages.reported]
 
-exp_fpqm_tumor_reported <- exp_fpqm_tumor[,indexes.stages.reported]
-exp_fpqm_tumor_reported <- t(exp_fpqm_tumor_reported)
-rownames(exp_fpqm_tumor_reported) <- df.stages$short.id[indexes.stages.reported]
-
-exp_prof_tumor_reported = exp_prof_tumor[,indexes.stages.reported]
-exp_prof_tumor_reported = t(exp_prof_tumor_reported)
- 
 cl <- makeMPIcluster(8)
-tumor.fpqm.varSelRF <- varSelRF(xdata = exp_fpqm_tumor_reported, Class = stages.levels, 
+tumor.fpqm.varSelRF <- varSelRF(xdata = t(exp_fpqm_tumor_reported), Class = stages.levels, 
                                  keep.forest = T)
-tumor.fpqm.boot <- varSelRFBoot(exp_fpqm_tumor_reported, stages.levels, bootnumber = 10, usingCluster = T,
+tumor.fpqm.boot <- varSelRFBoot(t(exp_fpqm_tumor_reported), stages.levels, bootnumber = 10, usingCluster = T,
                                 TheCluster = cl, srf= tumor.fpqm.varSelRF)
-tumor.fpqm.log.varSelRF <- varSelRF(xdata = exp_fpqm_tumor_log_reported, Class = stages.levels, 
+tumor.fpqm.log.varSelRF <- varSelRF(xdata = t(exp_fpqm_tumor_log_reported), Class = stages.levels, 
                                 keep.forest = T)
-tumor.fpqm.log.boot <- varSelRFBoot(exp_fpqm_tumor_log_reported, stages.levels, bootnumber = 10, usingCluster = T,
+tumor.fpqm.log.boot <- varSelRFBoot(t(exp_fpqm_tumor_log_reported), stages.levels, bootnumber = 10, usingCluster = T,
                                 TheCluster = cl, srf= tumor.fpqm.log.varSelRF)
-tumor.exp.varSelRF <- varSelRF(xdata = exp_prof_tumor_reported, Class = stages.levels, 
+tumor.exp.varSelRF <- varSelRF(xdata = t(exp_prof_tumor_reported), Class = stages.levels, 
                                 keep.forest = T)
-tumor.exp.boot <- varSelRFBoot(exp_prof_tumor_reported, stages.levels, bootnumber = 10, usingCluster = T,
+tumor.exp.boot <- varSelRFBoot(t(exp_prof_tumor_reported), stages.levels, bootnumber = 10, usingCluster = T,
                                 TheCluster = cl, srf= tumor.exp.varSelRF)
 
-tumor.fpqm.comb.varSelRF <- varSelRF(xdata = exp_fpqm_tumor_reported, Class = stages.levels.comb, 
+tumor.fpqm.comb.varSelRF <- varSelRF(xdata = t(exp_fpqm_tumor_reported), Class = stages.levels.comb, 
                                      keep.forest = T)
-tumor.fpqm.comb.boot <- varSelRFBoot(exp_fpqm_tumor_reported, stages.levels.comb, bootnumber = 10, usingCluster = T,
+tumor.fpqm.comb.boot <- varSelRFBoot(t(exp_fpqm_tumor_reported), stages.levels.comb, bootnumber = 10, usingCluster = T,
                                      TheCluster = cl, srf= tumor.fpqm.comb.varSelRF)
-tumor.fpqm.log.comb.varSelRF <- varSelRF(xdata = exp_fpqm_log_tumor_reported, Class = stages.levels.comb, 
+tumor.fpqm.log.comb.varSelRF <- varSelRF(xdata = t(exp_fpqm_log_tumor_reported), Class = stages.levels.comb, 
                                          keep.forest = T)
-tumor.fpqm.log.comb.boot <- varSelRFBoot(exp_fpqm_log_tumor_reported, stages.levels.comb, bootnumber = 10, usingCluster = T,
+tumor.fpqm.log.comb.boot <- varSelRFBoot(t(exp_fpqm_log_tumor_reported), stages.levels.comb, bootnumber = 10, usingCluster = T,
                                          TheCluster = cl, srf= tumor.fpqm.log.comb.varSelRF)
 
+tumor.fpqm.over.varSelRF <- varSelRF(xdata = t(exp_fpqm_tumor_reported_over), Class = stages.oversamp,
+                                     keep.forest = T)
+tumor.fpqm.over.boot <- varSelRFBoot(t(exp_fpqm_tumor_reported_over), Class = stages.oversamp, bootnumber = 10, usingCluster = T,
+                                     TheCluster = cl, srf= tumor.fpqm.over.varSelRF)
 
 stopCluster(cl)
 
@@ -135,4 +129,4 @@ stages.levels.comb <- sapply(as.character(stages.levels), function(x)
   else
     x = 'stage iv'
 })
-save(stages.levels.comb, file = 'environment/stages.level.comb' )
+save(stages.levels.comb, file = 'environment/stages.level.comb.RData' )
