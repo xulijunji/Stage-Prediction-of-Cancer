@@ -19,13 +19,14 @@ df.stages = data.frame(sample.id=sample.ids[tumor.indexes], patient.id = pats[tu
                          unlist(pat_stages[indexes.stages]), short.id = c(1:289))
 rownames(df.stages) = c(1:289)
 
-indexes.stages.reported <- which(df.stages$stage != 'not reported')
+indexes.stages.reported <- which(df.stages$stage != 'not reported') ##Contains indexes inside tumor.indexes
 
 exp_prof_tumor = exp_prof[,tumor.indexes]
 exp_prof_tumor_reported = exp_prof_tumor[,indexes.stages.reported]
 
 colnames(exp_prof_tumor) = df.stages$short.id
 colnames(exp_prof_tumor_reported) = df.stages$short.id[indexes.stages.reported]
+
 
 dds_tumor = DESeqDataSetFromMatrix(countData = exp_prof_tumor, colData = df.stages, design = ~stage)
 dds_tumor_reported = DESeqDataSetFromMatrix(countData = exp_prof_tumor_reported, 
@@ -44,6 +45,11 @@ save(dds_tumor_reported, file = 'environment/dds_tumor_reported.RData')
 
 exp_fpqm_tumor <- exp_fpqm[match(remove.dots(rownames(dds_tumor)), rownames(exp_fpqm)), tumor.indexes]
 exp_fpqm_tumor_reported <- exp_fpqm_tumor[match(rownames(dds_tumor_reported), rownames(exp_fpqm_tumor)),indexes.stages.reported]
+
+colnames(exp_fpqm_tumor_reported) <- df.stages$short.id[indexes.stages.reported]
+exp_fpqm_tumor_log_reported <- log2(exp_fpqm_tumor_reported+1)
+
+exp_prof_tumor_reported = exp_prof_tumor[,indexes.stages.reported]
 
 only.tumor.reported = list() ##Contains the various normalisations of tumor samples for which stages are known
 ##Also contains info about genes with various categories
@@ -78,3 +84,41 @@ image.direct.main = '~/Dropbox/honours/sem 7/RNA_Seq/papillary/images/tumor/PCA'
 ##Saves the various images
 save.plots.under.main.wd(image.direct.main, names(pca_tum_rep), pca_tum_rep, c(3,3,3,2))
 
+lda_tum_rep = list()
+lda_tum_rep = get.list.lda(only.tumor.reported$dfs, only.tumor.reported$genes, 
+                                    groups = df.stage.tumor.rep$stage)
+
+lda_tum_rep$diff = get.list.lda.gene(c(2:5), only.tumor.reported$dfs, diff.genes, 'diff', type = 1, df.stage.tumor.rep$stage)  
+entire.data.lda <- lapply(only.tumor.reported$dfs, function(x)
+    {
+    if(typeof(x) == 'S4')
+      x = assay(x)
+    x = t(x)
+    lda1 = lda(x, grouping = df.stage.tumor.rep$stage)
+    lda1.p = predict(lda1)
+    lda1.p$x = data.frame(lda1.p$x)
+    lda1.p$x$group = df.stage.tumor.rep$stage
+    lda1.list = list(lda1.p, lda1)
+  })
+
+##lda1 = lda(x = t(assay(only.tumor.reported$dfs$vs)), grouping = df.stage.tumor.rep$stage)
+
+
+##lda1.p = predict(lda1)
+##lda_tum_rep$`100`$x = data.frame(lda_tum_rep$`100`$x)
+##lda_tum_rep$`100`$x$group = df.stage.tumor.rep$stage
+##View(lda1.p$x)
+##View(lda1$means)
+##ggplot(data = lda_tum_rep$`100`$x, aes_string(x='LD1', y='LD2', color ='group')) +
+##coord_fixed() + geom_point(size=2.5) 
+##Test
+# library(FactoMineR)
+# library(factoextra)
+# df1 = t(only.tumor.reported$dfs$fpqm[only.tumor.reported$genes$fpqm$exp[1:100], ])
+# df2 = t(only.tumor.reported$dfs$fpqm[only.tumor.reported$genes$fpqm$exp[1:1000], ])
+# rownames(df1) = df.stage.tumor.rep$stage
+# rownames(df2) = df.stage.tumor.rep$stage
+# pc = PCA(df1)
+# pc2 = PCA(df2)
+# fviz_pca_ind(pc)
+# fviz_pca_ind(pc2)

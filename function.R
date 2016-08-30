@@ -269,3 +269,102 @@ save.plots.under.main.wd <- function(image.direct.main, names.image.direct.type,
     save.plots.main.wd(image.direct.main, names.image.direct.type[i], list.plots[[names.image.direct.type[i]]], names.cols[i])
   }
 }
+
+get.list.lda <- function(assay.list, gene.list, groups)
+{
+  ##arg - the indexes of list for differential genes and total number for others
+  ##assay.list - the list of assays/dfs for which each individual plot shall be made
+  ##gene.list - the vector containing the required genes for which we want to plot
+  ##colData - col_data of DESeq object to be used for non assay type objects
+  ##intrgroup - specifying the type of column in coldData to be used as basis of differentiation
+  
+  
+  ##gets the list of plotPCA based on different categories for a list of dfs for a list of genes
+  ##using get.list.plotPCA.df.gene
+  list.df.gene.lda <- list()
+  for(i in seq_along(gene.list[[1]]))
+  {
+    print(i)
+    list.df.gene.lda[[names(gene.list[[1]])[i]]] = list()
+    for(j in seq_along(assay.list))
+    {
+      list.df.gene.lda[[names(gene.list[[1]])[i]]][[names(assay.list)[j]]]  =
+        get.list.lda.df.gene(c(100,500,1000,2000,3000,4000,5000),assay.list[[j]], gene.list[[j]][[i]],
+                                 names(gene.list[[1]])[i], 2, groups = groups)  
+    }
+    
+  }
+  return(list.df.gene.lda)
+}
+
+get.list.lda.df.gene <- function(arg, assay, gene.list, main_string, type = 1, groups)
+{
+  ##arg - the indexes of list for differential genes and total number for others
+  ##assay - the df for which plot shall be made
+  ##gene.list - the list containing the required genes for which we want to plot
+  ##main_string - Title to be shown on plot
+  ##type - 1 if we are using differential genes else 2 for all other genes
+  ##colData - col_data of DESeq object to be used for non assay type objects
+  ##intrgroup - specifying the type of column in coldData to be used as basis of differentiation
+  
+  ##gets the list of plotPCA based on different categories for a given df for a given type of genes
+  library(MASS)
+  if(typeof(assay) == 'S4')
+    assay = assay(assay)
+  #print(typeof(gene.list))
+  if(type == 1)
+  {
+    li <- lapply(arg, function(x)
+    {
+      req.data <- t(assay[gene.list[[x]],])
+      #tmp <- cor(req.data)
+      #req.dat <- req.data[,!apply(tmp,2,function(x) any(abs(x) > 0.99))]
+      #print(head(req.data))
+      #print(head(req.dat))
+      lda1 = lda(req.data, grouping = groups)
+      lda1.p = predict(lda1)
+      lda1.p$x = data.frame(lda1.p$x)
+      lda1.p$x$group = groups
+      lda1.list = list(lda1.p, lda1)
+    })
+    
+  }
+  else if(type == 2)
+  {
+    li <- lapply(arg, function(x)
+    {
+      req.data <- t(assay[gene.list[1:x],])
+      #tmp <- cor(req.data)
+      #req.data <- req.data[,!apply(tmp,2,function(x) any(abs(x) > 0.99))]
+      lda1 = lda(req.data, grouping = groups)
+      lda1.p = predict(lda1)
+      lda1.p$x = data.frame(lda1.p$x)
+      lda1.p$x$group = groups
+      lda1.list = list(lda1.p, lda1)
+    })
+  }
+  
+  names(li) <- arg 
+  return(li)
+}
+
+get.list.lda.gene <- function(arg, assay.list, gene.vec, main_string, type = 1, group)
+{
+  ##arg - the indexes of list for differential genes and total number for others
+  ##assay.list - the list of assays/dfs for which each individual plot shall be made
+  ##gene.vec - the vector containing the required genes for which we want to plot
+  ##main_string - Title to be shown on plot
+  ##type - 1 if we are using differential genes else 2 for all other genes
+  ##colData - col_data of DESeq object to be used for non assay type objects
+  ##intrgroup - specifying the type of column in coldData to be used as basis of differentiation
+  
+  ##gets the list of plotPCA based on different categories for a list of dfs for a given type of genes
+  ##using get.list.plotPCA.df.gene
+  
+  list.dfs.lda = lapply(assay.list, function(x)
+  {
+    get.list.lda.df.gene(arg, x , gene.vec, main_string, type, group)
+  })
+  names(list.dfs.lda) = names(assay.list)
+  return(list.dfs.lda)
+}
