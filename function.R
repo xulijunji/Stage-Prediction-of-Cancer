@@ -247,7 +247,7 @@ save.plots.main.wd <- function(image.direct.main, image.direct.type, list.plots,
   {
     file = paste(image.direct.main, image.direct.type, 
                  paste(names(list.plots)[i],'jpg', sep = '.'), sep = '/')
-    jpeg(file, width = 1000, heigh = 1000)
+    jpeg(file, width = 1000, height = 1000)
     multiplot(list.plots[[i]], col = 2)
     dev.off()
     
@@ -270,6 +270,17 @@ save.plots.under.main.wd <- function(image.direct.main, names.image.direct.type,
   }
 }
 
+create.lda.plots <- function(lda.list, title)
+{
+  library(ggplot2)
+  lda.ob = lda.list[[2]]
+  lda.pred = lda.list[[1]]
+  traces = (lda.ob$svd)^2/sum((lda.ob$svd)^2)
+  ggplot(data = lda.pred$x, aes_string(x='LD1', y='LD2', color ='group')) +
+  coord_fixed() + geom_point(size=2.5) + ggtitle(title) + 
+  xlab(paste0(round(traces[1]*100), '%')) +
+  ylab(paste0(round(traces[2]*100), '%'))
+}
 get.list.lda <- function(assay.list, gene.list, groups)
 {
   ##arg - the indexes of list for differential genes and total number for others
@@ -309,6 +320,7 @@ get.list.lda.df.gene <- function(arg, assay, gene.list, main_string, type = 1, g
   
   ##gets the list of plotPCA based on different categories for a given df for a given type of genes
   library(MASS)
+  library(DESeq2)
   if(typeof(assay) == 'S4')
     assay = assay(assay)
   #print(typeof(gene.list))
@@ -326,6 +338,8 @@ get.list.lda.df.gene <- function(arg, assay, gene.list, main_string, type = 1, g
       lda1.p$x = data.frame(lda1.p$x)
       lda1.p$x$group = groups
       lda1.list = list(lda1.p, lda1)
+      create.lda.plots(lda1.list, 
+                       title = paste(main_string,as.character(x), sep = '_'))
     })
     
   }
@@ -341,6 +355,8 @@ get.list.lda.df.gene <- function(arg, assay, gene.list, main_string, type = 1, g
       lda1.p$x = data.frame(lda1.p$x)
       lda1.p$x$group = groups
       lda1.list = list(lda1.p, lda1)
+      create.lda.plots(lda1.list, 
+                       title = paste(main_string,as.character(x), sep = '_'))
     })
   }
   
