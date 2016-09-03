@@ -87,8 +87,13 @@ save.plots.under.main.wd(image.direct.main, names(pca_tum_rep), pca_tum_rep, c(3
 lda_tum_rep = list()
 lda_tum_rep = get.list.lda(only.tumor.reported$dfs, only.tumor.reported$genes, 
                                     groups = df.stage.tumor.rep$stage)
+lda_tum_rep_3 = get.list.lda(only.tumor.reported$dfs, only.tumor.reported$genes, 
+                           groups = df.stage.tumor.rep$stage)
 
-lda_tum_rep$diff = get.list.lda.gene(c(2:5), only.tumor.reported$dfs, diff.genes, 'diff', type = 1, df.stage.tumor.rep$stage)  
+lda_tum_rep_3$diff = get.list.lda.gene(c(2:5), only.tumor.reported$dfs, diff.genes, 'diff', type = 1, df.stage.tumor.rep$stage)  
+image.direct.main = '~/Dropbox/honours/sem 7/RNA_Seq/papillary/images/tumor/LDA3'
+save.plots.under.main.wd(image.direct.main, names(pca_tum_rep), lda_tum_rep, c(3,3,3,2))
+
 entire.data.lda <- lapply(only.tumor.reported$dfs, function(x)
     {
     if(typeof(x) == 'S4')

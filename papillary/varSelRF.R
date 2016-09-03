@@ -39,8 +39,8 @@ tumor.fpqm.over.boot <- varSelRFBoot(t(exp_fpqm_tumor_reported_over), Class = st
 
 stopCluster(cl)
 
-####
 
+###
 plot.lists <- function(varSelRF.lists, index)
 {
   library(varSelRF)
@@ -53,18 +53,20 @@ plot.lists <- function(varSelRF.lists, index)
 
 }
 
-plot.lists(list(tumor.fpqm.varSelRF, tumor.fpqm.log.varSelRF, tumor.exp.varSelRF), index = 1)
-plot.lists(list(tumor.fpqm.varSelRF, tumor.fpqm.log.varSelRF, tumor.exp.varSelRF), index = 2)
+plot.lists(list(tumor.fpqm.varSelRF, tumor.fpqm.log.varSelRF), index = 1)
+plot.lists(list(tumor.fpqm.varSelRF, tumor.fpqm.log.varSelRF), index = 2)
+
+plot.lists(list(tumor.fpqm.comb.varSelRF, tumor.fpqm.log.comb.varSelRF), index = 1)
+plot.lists(list(tumor.fpqm.comb.varSelRF, tumor.fpqm.log.comb.varSelRF), index = 2)
+
+plot.lists(list(tumor.fpqm.over.varSelRF), index = 1)
+plot.lists(list(tumor.fpqm.over.varSelRF), index = 2)
+
 plot(tumor.exp.boot, subject.names = df.stages$short.id)
 selProbPlot(tumor.exp.boot)
-summary(tumor.exp.varSelRF)
+
 
 dir.copy = paste(getwd(), 'results/tumor/varSelRF', sep = '/')
-
-
-write.csv(tumor.exp.varSelRF$selec.history, paste(dir.copy, 'history_exp.csv', sep = '/'))
-write.csv(tumor.fpqm.varSelRF$selec.history, paste(dir.copy, 'history_fpqm.csv', sep = '/'))
-write.csv(tumor.fpqm.log.varSelRF$selec.history, paste(dir.copy, 'history_fpqm_log.csv', sep = '/'))
 
 tumor.exp.varSelRF$selected.vars
 tumor.fpqm.varSelRF$selected.vars
@@ -79,9 +81,7 @@ tumor.exp.boot$bootstrap.pred.error
 tumor.fpqm.boot$bootstrap.pred.error
 tumor.fpqm.log.boot$bootstrap.pred.error
 
-write.csv(tumor.exp.boot$all.data.randomForest$confusion, paste(dir.copy, 'confusion_exp.csv', sep ='/'))
-write.csv(tumor.fpqm.boot$all.data.randomForest$confusion, paste(dir.copy, 'confusion_fpqm.csv', sep ='/'))
-write.csv(tumor.fpqm.log.boot$all.data.randomForest$confusion, paste(dir.copy, 'confusion_fpqm_log.csv', sep ='/'))
+
 
 tumor.exp.boot$all.data.randomForest$importance
 tumor.fpqm.boot$all.data.randomForest$importance
