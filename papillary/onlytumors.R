@@ -72,7 +72,7 @@ only.tumor[['dfs']][['fpqm_log']] = as.matrix(log2(exp_fpqm_tumor + 1))
 only.tumor[['genes']] = list()
 only.tumor[['genes']] = create.list.imp.genes(only.tumor[['dfs']], 5000)
 
-
+save(only.tumor.reported, file = 'environment/only_tumor_reported.RData')
 pca_tum_rep = list() ##stores the pca list for tumor reported for various dfs for various genes
 pca_tum_rep = get.list.plotPCA(only.tumor.reported$dfs, only.tumor.reported$genes, 
                                colData = df.stage.tumor.rep, intgroup = 'stage')

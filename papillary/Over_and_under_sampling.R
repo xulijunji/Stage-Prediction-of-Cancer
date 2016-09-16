@@ -1,3 +1,4 @@
+###Just repeating the samples
 df.stage.tumor.rep <- df.stages[indexes.stages.reported, ]
 df.stage.tumor.rep$stage = droplevels(df.stage.tumor.rep$stage)
 stage.dist = table(df.stage.tumor.rep$stage)
@@ -58,3 +59,52 @@ for(i in seq_along(new.indexes.oversamp))
 }
 save(exp_fpqm_tumor_reported_over, file = 'environment/exp_fpqm_tumor_reported_over.RData')
 save(stages.oversamp, file = 'environment/stages.oversamp.RData')
+
+##Using Rose and unbalanced
+install.packages('~/Dropbox/DMwR_0.4.1.tar.gz', type = 'source', repos = NULL)
+library(DMwR)
+t.exp.nt = t(assay(only.tumor.reported$dfs$nt))
+t.exp.nt = data.frame(t.exp.nt)
+t.exp.nt$labels_act = as.factor(stages.levels)
+t.exp.nt$comb = as.factor(stages.levels.comb)
+
+t.exp.fpqm.reported = t(exp_fpqm_tumor_reported)
+t.exp.fpqm.reported = data.frame(t.exp.fpqm.reported)
+t.exp.fpqm.reported$labels_act = stages.levels
+t.exp.fpqm.reported$comb = as.factor(stages.levels.comb)
+
+smt.comb <- SMOTE(comb~., t.exp.fpqm.reported[,-which(c('labels_act') == colnames(t.exp.fpqm.reported))],
+             perc.over = 200, perc.under = 150)
+smt.comb.nt <- SMOTE(comb~., t.exp.nt[,-which(c('labels_act') == colnames(t.exp.nt))],
+                  perc.over = 200, perc.under = 150)
+remove(smt.comb.nt)
+remove(smt.comb)
+remove(t.exp.fpqm.reported)
+remove(t.exp.nt)
+
+library(unbalanced)
+classes.comb = rep(c(0), each = 260)
+classes.comb[t.exp.fpqm.reported$comb == 'stage iv'] = 1
+
+und.comb.fpqm <- ubUnder(X = t.exp.fpqm.reported[,-c(which(c('labels_act') == colnames(t.exp.fpqm.reported)),
+                                                 which(c('comb') == colnames(t.exp.fpqm.reported)))], 
+                        Y = as.factor(classes.comb), method = 'percPos')
+und.comb.fpqm$Y = as.numeric(und.comb.fpqm$Y)
+und.comb.fpqm$Y[und.comb.fpqm$Y == 2] = 'stage iv'
+und.comb.fpqm$Y[und.comb.fpqm$Y == 1] = 'stage i'
+und.comb.fpqm$Y = as.factor(und.comb.fpqm$Y)
+
+und.comb.nt <- ubUnder(X = t.exp.nt[,-c(which(c('labels_act') == colnames(t.exp.nt)),
+                                                   which(c('comb') == colnames(t.exp.nt)))], 
+                       Y = as.factor(classes.comb), method = 'percPos')
+und.comb.nt$Y = as.numeric(und.comb.nt$Y)
+und.comb.nt$Y[und.comb.nt$Y == 2] = 'stage iv'
+und.comb.nt$Y[und.comb.nt$Y == 1] = 'stage i'
+und.comb.nt$Y = as.factor(und.comb.nt$Y)
+
+remove(classes.comb)
+
+library(ROSE)
+ros <- ROSE(comb~., t.exp.fpqm.reported[,-which(c('labels_act') == colnames(t.exp.fpqm.reported))])
+##Trying on 2 class data only
+

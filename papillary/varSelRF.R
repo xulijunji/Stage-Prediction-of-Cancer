@@ -37,6 +37,18 @@ tumor.fpqm.over.varSelRF <- varSelRF(xdata = t(exp_fpqm_tumor_reported_over), Cl
 tumor.fpqm.over.boot <- varSelRFBoot(t(exp_fpqm_tumor_reported_over), Class = stages.oversamp, bootnumber = 10, usingCluster = T,
                                      TheCluster = cl, srf= tumor.fpqm.over.varSelRF)
 
+tumor.fpqm.smt.comb.varSelRF <-  varSelRF(xdata = data.frame(smt.comb[, -which(c('comb') == colnames(smt.comb))]),
+                                          Class = smt.comb$comb, keep.forest = T)
+tumor.nt.smt.comb.varSelRF <- varSelRF(xdata = data.frame(smt.comb.nt[, -which(c('comb') == colnames(smt.comb.nt))]),
+                                            Class = smt.comb.nt$comb, keep.forest = T)
+tumor.fpqm.under.comb.varSelRF <- varSelRF(xdata = und.comb.fpqm$X, Class = und.comb.fpqm$Y, keep.forest = T)
+tumor.nt.under.comb.varSelRF <- varSelRF(xdata = und.comb.nt$X, Class = und.comb.nt$Y, keep.forest = T)
+ 
+
+save(tumor.fpqm.smt.comb.varSelRF, file = 'environment/tumor_fpqm_smote_comb_var.RData')
+save(tumor.nt.smt.comb.varSelRF, file = 'environment/tumor_nt_smote_comb_var.RData')
+save(tumor.fpqm.under.comb.varSelRF, file = 'environment/tumor_fpqm_under_comb_var.RData')
+save(tumor.nt.under.comb.varSelRF, file = 'environment/tumor_nt_under_comb_var.RData')
 stopCluster(cl)
 
 

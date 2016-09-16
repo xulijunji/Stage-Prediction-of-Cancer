@@ -65,6 +65,15 @@ rf.fpqm.tum.rep.min$confusion
 rf.fpqm.log.tum.rep.min$confusion
 remove(rf.fpqm.log.tum.rep.min, rf.fpqm.tum.rep.min)
 
+length(colnames(exp_fpqm_tumor_reported_over))
+rf.fpqm.tum.rep.over <- randomForest(x = t(exp_fpqm_tumor_reported_over[over.sel.genes,]),
+                                     y = stages.oversamp, keep.forest = T)
+rf.over.predict <- predict(object = rf.fpqm.tum.rep.over, type = 'response',
+                                   newdata = t(exp_fpqm_tumor_reported[over.sel.genes,]))
+
+rownames(exp_fpqm_tumor_reported_over) = remove.dots(rownames(exp_fpqm_tumor_reported_over))
+
+
 fpqm.comb.tum.rep = get.split(sel.list$fpqm_comb$Vars.in.Forest[24])
 fpqm.log.comb.tum.rep = get.split(sel.list$fpqm_comb_log$Vars.in.Forest[24])
 length(intersect(rf.fpqm.log.comb.tum.rep, rf.fpqm.comb.tum.rep))
@@ -76,6 +85,22 @@ rf.fpqm.comb.tum.rep = randomForest(x = t(exp_fpqm_tumor_reported[intersect(fpqm
 rf.fpqm.comb.tum.rep$confusion
 remove(rf.fpqm.comb.tum.rep,  rf.fpqm.log.comb.tum.rep)
 
+create.confusion.mat <- function(prediction, act.stage)
+{
+  types <- levels(prediction)
+  stages.levels <- as.character(act.stage)
+  prediction <- as.character(prediction)
+  counts = c()
+  conf <- lapply(types, function(x)
+    {
+      stage.indexes = which(act.stage == x)
+      for(i in types)
+        counts = c(counts,sum(prediction[stage.indexes] == i))
+      print(counts)
+  })
+  names(conf)= types
+  return(conf)
+}
 ####Using genes collected from oversampling
 
 tumor.fpqm.over.varSelRF$selected.vars
@@ -84,7 +109,7 @@ rf.fpqm.tum.rep.over = randomForest(x = t(exp_fpqm_tumor_reported[over.sel.genes
                               y = stages.levels, ntree = 5000, keep.forest = T)
 
 rf.fpqm.tum.rep.over = predict(object = tumor.fpqm.over.boot$all.data.randomForest, 
-                               newdata = t(exp_fpqm_tumor_reported))
+                               newdata = t(exp_fpqm_tumor_log_reported))
 
 rf.fpqm.log.tum.rep.over = randomForest(x = t(exp_fpqm_tumor_log_reported[over.sel.genes, ]),
                               y = stages.levels, ntree = 5000, keep.forest = T)
