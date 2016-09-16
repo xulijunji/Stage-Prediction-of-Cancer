@@ -128,6 +128,22 @@ nt_tumor_reported$confusion
 rf.fpqm.tum.rep$confusion
 rf.fpqm.tum.rep.min$confusion
 
+###Using genes from SMOTE
+rf.nt.smote <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[tumor.nt.smt.comb.varSelRF$selected.vars,])),
+                            y = df.stage.tumor.rep$stage, ntree = 5000, keep.forest = T)
+rf.nt.under <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[tumor.nt.under.comb.varSelRF$selected.vars,])),
+                            y = df.stage.tumor.rep$stage, ntree = 5000, keep.forest = T)
+rf.nt.across.stage <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[Reduce(union,Reduce(union,genes.list)),])),
+                            y = df.stage.tumor.rep$stage, ntree = 5000, keep.forest = T)
+
+rf.nt.smote.comb <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[tumor.nt.smt.comb.varSelRF$selected.vars,])),
+                            y = as.factor(stages.levels.comb), ntree = 5000, keep.forest = T)
+rf.nt.under.comb <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[tumor.nt.under.comb.varSelRF$selected.vars,])),
+                            y = as.factor(stages.levels.comb), ntree = 5000, keep.forest = T)
+rf.nt.across.stage.comb <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[Reduce(union,Reduce(union,genes.list)),])),
+                                   y = as.factor(stages.levels.comb), ntree = 5000, keep.forest = T)
+
+
 pca_over_sel_genes = list()
 for(i in seq_along(only.tumor.reported$dfs))
 {
