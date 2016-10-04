@@ -12,7 +12,6 @@ gen_ext.R
 onlytumors.R - creates data frames/dds objects for only tumor samples of exp_prof,exp_fpqm/log
 Also separates them into only those for which we stage data.
 Uses function.R and it is in this files we call functions and save images for visualisation
-
 sample_info.R
 
 Visualisation.R

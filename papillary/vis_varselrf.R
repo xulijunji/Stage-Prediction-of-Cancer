@@ -129,20 +129,56 @@ rf.fpqm.tum.rep$confusion
 rf.fpqm.tum.rep.min$confusion
 
 ###Using genes from SMOTE
+load('environment/tumor_fpqm_smote_comb_var.RData')
+rf.fpqm.smt.comb.smotedata <- randomForest(x = t.exp.fpqm.reported[,tumor.fpqm.smt.comb.varSelRF$selected.vars], y = t.exp.fpqm.reported$comb,
+                                           ntree = 5000, keep.forest = T) 
+rf.fpqm.smt.comb.smotedata$confusion
+
+
+##NT
+rf.nt.smt.comb.smotedata. <- randomForest(x = smt.comb.nt[,tumor.nt.smt.comb.varSelRF$selected.vars], y = smt.comb.nt[['comb']],
+                                          ntree = 5000, keep.forest = T)
+rf.nt.predict <- predict(object = rf.nt.smt.comb.smotedata., 
+                         newdata = t(assay(only.tumor.reported$dfs$nt[tumor.nt.smt.comb.varSelRF$selected.vars,])))
+
 rf.nt.smote <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[tumor.nt.smt.comb.varSelRF$selected.vars,])),
                             y = df.stage.tumor.rep$stage, ntree = 5000, keep.forest = T)
-rf.nt.under <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[tumor.nt.under.comb.varSelRF$selected.vars,])),
+rf.nt.smote.comb <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[tumor.nt.smt.comb.varSelRF$selected.vars,])),
                             y = df.stage.tumor.rep$stage, ntree = 5000, keep.forest = T)
+
+con.list <- lapply(list(rf.nt.smt.comb.smotedata., rf.nt.smote, rf.nt.smote.comb) ,
+                         function(x)
+                        {
+                          x$confusion
+                        }
+)
+names(con.list) = c('nt_smt_smotedata', 'nt_smt', 'nt_smt_comb')
+write.dfs.csvs(folder = '~/Dropbox/honours/sem 7/RNA_Seq/papillary/results/tumor/varSelRF/confusion/', con.list)
+conf.pred <- create.confusion.mat(rf.nt.predict, stages.levels.comb)
+
 rf.nt.across.stage <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[Reduce(union,Reduce(union,genes.list)),])),
                             y = df.stage.tumor.rep$stage, ntree = 5000, keep.forest = T)
 
-rf.nt.smote.comb <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[tumor.nt.smt.comb.varSelRF$selected.vars,])),
-                            y = as.factor(stages.levels.comb), ntree = 5000, keep.forest = T)
 rf.nt.under.comb <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[tumor.nt.under.comb.varSelRF$selected.vars,])),
                             y = as.factor(stages.levels.comb), ntree = 5000, keep.forest = T)
+rf.nt.under.comb.unddata <- randomForest(x= und.comb.nt$X[,tumor.nt.under.comb.varSelRF$selected.vars],
+                                 y = und.comb.nt$Y, ntree = 5000, keep.forest = T)
+rf.nt.under.predict <- predict(object = rf.nt.under.comb.unddata, 
+                               newdata = t(assay(only.tumor.reported$dfs$nt[tumor.nt.under.comb.varSelRF$selected.vars,])))
+conf.pred.under.nt <- create.confusion.mat(rf.nt.under.predict, stages.levels.comb)
+con.list <- lapply(list(rf.nt.across.stage, rf.nt.under.comb, rf.nt.under.comb.unddata) ,
+                   function(x)
+                   {
+                     x$confusion
+                   }
+)
+names(con.list) = c('across_stage', 'nt_under_comb', 'nt_under_comb_unddata')
+write.dfs.csvs(folder = '~/Dropbox/honours/sem 7/RNA_Seq/papillary/results/tumor/varSelRF/confusion/', con.list)
+
 rf.nt.across.stage.comb <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[Reduce(union,Reduce(union,genes.list)),])),
                                    y = as.factor(stages.levels.comb), ntree = 5000, keep.forest = T)
 
+sum(which(rf.nt.predict == 'stage i') == which(stages.levels.comb == 'stage i'))
 
 pca_over_sel_genes = list()
 for(i in seq_along(only.tumor.reported$dfs))

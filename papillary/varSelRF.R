@@ -74,6 +74,13 @@ plot.lists(list(tumor.fpqm.comb.varSelRF, tumor.fpqm.log.comb.varSelRF), index =
 plot.lists(list(tumor.fpqm.over.varSelRF), index = 1)
 plot.lists(list(tumor.fpqm.over.varSelRF), index = 2)
 
+plot.lists(list(tumor.fpqm.smt.comb.varSelRF, tumor.nt.smt.comb.varSelRF), index = 1)
+plot.lists(list(tumor.fpqm.smt.comb.varSelRF, tumor.nt.smt.comb.varSelRF), index = 2)
+
+plot.lists(list(tumor.fpqm.under.comb.varSelRF, tumor.nt.under.comb.varSelRF), index = 1)
+plot.lists(list(tumor.fpqm.under.comb.varSelRF, tumor.nt.under.comb.varSelRF), index = 2)
+
+
 plot(tumor.exp.boot, subject.names = df.stages$short.id)
 selProbPlot(tumor.exp.boot)
 
