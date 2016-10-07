@@ -1,75 +1,17 @@
 stable_genes = list()
 stable_genes_files = list.files('results/tumor/stable_gene_sel/')
+names.stable.genes <- c('1','2','cho','f')
+names.dfs <- c('fpqm','fpqm_log','nt','vs')
 
-j = 1
-
-compute.class.means <- function(data, labs)
-{
-  ###data - N*j, where N number of samples and j number of genes
-  classes <- levels(labs)
-  class.means <- matrix(nrow = length(classes), ncol = dim(data)[2])
-  
-  for(i in seq(1:dim(data)[2]))
-  {
-    class.means[,i] = sapply(classes, function(x)
-    {
-      indexes = which(labs == x)
-      mean.gene.class = mean(data[indexes,i])
-    })
-  }
-  return(class.means)
-}
-
-compute.var.gene <- function(data, class.means, labs, gene.index)
-{
-  ###data - N*j, where N number of samples and j number of genes
-  classes <- levels(labs)
-  vars.class.genes = c()
-  vars.classes.gene <- sapply(classes, function(x)
-  {
-      class.index <- which(classes == x)
-      indexes <- which(labs == x)
-    #  print(indexes)
-      var.class.gene <- (sum((A[indexes, gene.index] - class.means[class.index, gene.index])^2))/(length(indexes)-1)
-      #print(var.class.gene)
-    })
-  return(vars.classes.gene)
-}
-
-compute.ftest <- function(data, labs)
-{
-  ###data - N*j, where N number of samples and j number of genes
-  classes <- levels(labs)
-  class.means = compute.class.means(data, labs)
-  class.lengths <- table(labs)
-  means.overall <- apply(class.means, 2, mean)
-  total.samples <- sum(class.lengths)
-  total.classes <- length(classes)
-  genes.vars.classes <- sapply(c(1:dim(data)[2]), function(i)
-    {
-    compute.var.gene(data, class.means, labs, i)
-  })
-  vars.genes <- sapply(c(1:dim(data)[2]), function(i)
-    {
-      gene.vars <- genes.vars.classes[,i]
-      net.sigms <- mapply(function(x,y)
-        {
-        y*(y-1)*x
-      }, gene.vars, class.lengths)
-      sum(net.sigms)/(total.samples - total.classes)
-  })
-  
-  f.vals <- sapply(c(1:dim(data)[2]), function(i)
-  {
-    f.val <- sapply(c(1:total.classes), function(x)
+fvals.df <- lapply(req.dfs, function(x)
       {
-        class.lengths[x]*(class.means[x,i] - means.overall[i])
-    })
-    sum(f.val)/((total.classes-1)*vars.genes[j])
-  })
-  return(f-vals)
-}
+        compute.ftest(x, stages.levels)
+      }
+  )
+names(fvals.df) = names(req.dfs)
+write.dfs.csvs('results/tumor/stable_gene_sel/',fvals.df)
 
+####Testing dummy vars
 A = matrix(nrow = 12, ncol = 4)
 A[,1] = c(0.65,0.85,0.9,0.9,1.1,1.5,1.3,1.2,1.5,1.7,2.0,1.6)
 A[,2] = c(0.2,1.0,1.2, 0.7,1.4,1.8,0.9, 1.0,1.7,2.1,2.0,1.2)
@@ -80,14 +22,28 @@ exm.lab <- factor(c('stage i', 'stage i', 'stage i', 'stage ii','stage ii','stag
                     'stage iii','stage iii','stage iii','stage iii','stage iii'))
 
 means <- compute.class.means(A, exm.lab)
-ftest <- compute.ftest(A, exm.lab)
+fvals <- compute.ftest(A, exm.lab)
+df <- compute.ftest(A, exm.lab)
+remove(ftest,means,vars,A,exm.lab)
+remove(req.dfs) ##write_input.R
+####Testing ends
 
+j = 1
 for(i in stable_genes_files)
 {
-  quo = as.integer(j / 3)
-  rem = j %% 3
-  if(quo == 0)
+  quo = ceiling(j / 4)
+  rem = j %% 4
+  if(rem == 0)
   {
-     
+    rem = 4
+    f = read.csv(paste('results/tumor/stable_gene_sel/',i,sep = ''), header = T)
   }
+  else
+    f = read.csv(paste('results/tumor/stable_gene_sel/',i,sep = ''), header = F)
+  
+  stable_genes[[names.dfs[quo]]][[names.stable.genes[rem]]] = f
+  j = j + 1
 }
+remove(f,i,j,names.dfs,names.stable.genes,stable_genes_files)
+
+length(intersect(stable_genes$fpqm$cho$V1[1:100], stable_genes$fpqm$f$indexes[1:100]))

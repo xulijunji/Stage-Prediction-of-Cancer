@@ -180,6 +180,64 @@ rf.nt.across.stage.comb <- randomForest(x= t(assay(only.tumor.reported$dfs$nt[Re
 
 sum(which(rf.nt.predict == 'stage i') == which(stages.levels.comb == 'stage i'))
 
+rf.fpqm.strat.rep <- randomForest(x = t(exp_fpqm_tumor_reported[tumor.fpqm.varSelRF.samp.rep$selected.vars,]),
+                                  y= stages.levels, ntree = 5000, keep.forest = T, nodesize = 5, 
+                                  strata = stages.levels,  sampsize = c(15,15,10,15))
+rf.fpqm.strat.rep$confusion
+
+rf.fpqm.strat.not.rep <- randomForest(x = t(exp_fpqm_tumor_reported[tumor.fpqm.varSelRF.samp.not.rep$selected.vars,]),
+                                  y= stages.levels, ntree = 5000, keep.forest = T, nodesize = 1,
+                                  strata = stages.levels,  sampsize = c(50,15,30,10), replace = F)
+rf.fpqm.strat.not.rep$confusion
+
+rf.fpqm.wt <- randomForest(x = t(exp_fpqm_tumor_reported[tumor.fpqm.varSelRF.wt$selected.vars,]),
+                                  y= stages.levels, ntree = 5000, keep.forest = T, nodesize = 50, 
+                           wt = c(1,7.8,3,11))
+rf.fpqm.wt$confusion
+
+rf.fpqm.comb.strat <- randomForest(x = t(exp_fpqm_tumor_reported[tumor.fpqm.varSelRF.comb.strat$selected.vars,]),
+                                   y = stages.levels.comb, strata = stages.levels.comb, sampsize = c(100,66))
+rf.fpqm.comb.strat$confusion
+
+rf.fpqm.comb.wt <- randomForest(x = t(exp_fpqm_tumor_reported[tumor.fpqm.varSelRF.comb.wt$selected.vars,]),
+                                   y = stages.levels.comb, classwt = c(1,6))
+rf.fpqm.comb.wt$confusion
+
+rf.fpqm.1.4 <- randomForest(x = t(exp_fpqm_tumor_reported[tumor.fpqm.varSelRF.1.4$selected.vars,stages.levels[union(stage.ind$`stage i`, stage.ind$`stage iv`)]]),
+                            y = droplevels(stages.levels[union(stage.ind$`stage i`, stage.ind$`stage iv`)]))
+rf.fpqm.1.4$confusion
+
+rf.fpqm.2.3.4 <- randomForest(x = t(exp_fpqm_tumor_reported[tumor.fpqm.varSelRF.2.3.4$selected.vars, 
+                                                            Reduce(union, stage.ind[-1])]),
+                              y = droplevels(stages.levels[Reduce(union, stage.ind[-1])]))
+rf.fpqm.2.3.4$confusion 
+
+rf.fpqm.2.3.4 <- randomForest(x = t(exp_fpqm_tumor_reported[tumor.fpqm.varSelRF.2.3.4.strat$selected.vars, 
+                                                            Reduce(union, stage.ind[-1])]),
+                              y = droplevels(stages.levels[Reduce(union, stage.ind[-1])]),
+                              strata = droplevels(stages.levels[Reduce(union, stage.ind[-1])]), sampsize = c(22,25,15))
+rf.fpqm.2.3.4$confusion
+
+rf.fpqm.1.2 <- randomForest(x = t(exp_fpqm_tumor_reported[tumor.fpqm.varSelRF.1.2$selected.vars,Reduce(union,stage.ind[c(1,2)])]),
+                            y = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]),
+                            strata = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]), sampsize = c(34,22))
+rf.fpqm.1.2$confusion
+
+rf.fpqm.1.2.strata.1 <- randomForest(x = t(exp_fpqm_tumor_reported[tumor.fpqm.varSelRF.1.2.strat.1$selected.vars,Reduce(union,stage.ind[c(1,2)])]),
+                            y = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]),
+                            strata = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]), sampsize = c(22,22))
+rf.fpqm.1.2.strata.1$confusion
+
+rf.fpqm.1.2.strata.2 <- randomForest(x = t(exp_fpqm_tumor_reported[tumor.fpqm.varSelRF.1.2.strat.2$selected.vars,Reduce(union,stage.ind[c(1,2)])]),
+                                     y = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]),
+                                     strata = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]), sampsize = c(22,22))
+rf.fpqm.1.2.strata.2$confusion
+
+rf.fpqm.1.2.strata.3 <- randomForest(x = t(exp_fpqm_tumor_reported[tumor.fpqm.varSelRF.1.2.strat.3$selected.vars,Reduce(union,stage.ind[c(1,2)])]),
+                                     y = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]),
+                                     strata = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]), sampsize = c(22,22))
+rf.fpqm.1.2.strata.3$confusion
+
 pca_over_sel_genes = list()
 for(i in seq_along(only.tumor.reported$dfs))
 {

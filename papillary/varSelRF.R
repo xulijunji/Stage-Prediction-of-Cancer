@@ -43,13 +43,74 @@ tumor.nt.smt.comb.varSelRF <- varSelRF(xdata = data.frame(smt.comb.nt[, -which(c
                                             Class = smt.comb.nt$comb, keep.forest = T)
 tumor.fpqm.under.comb.varSelRF <- varSelRF(xdata = und.comb.fpqm$X, Class = und.comb.fpqm$Y, keep.forest = T)
 tumor.nt.under.comb.varSelRF <- varSelRF(xdata = und.comb.nt$X, Class = und.comb.nt$Y, keep.forest = T)
- 
+
+tumor.fpqm.varSelRF.samp.rep <- varSelRF(xdata = t(exp_fpqm_tumor_reported), Class = stages.levels, 
+                                sampsize = c(30,22,25,15), strata = stages.levels, replace = T)
+tumor.fpqm.varSelRF.samp.not.rep <- varSelRF(xdata = t(exp_fpqm_tumor_reported), Class = stages.levels, 
+                                             strata = stages.levels,
+                                sampsize = c(25,15,20,10), replace = F)
+tumor.fpqm.varSelRF.wt <- varSelRF(xdata = t(exp_fpqm_tumor_reported), Class = stages.levels, 
+                                            classwt = c(1,7.8,3.37,11.47))
+
+tumor.fpqm.varSelRF.comb.strat <-  varSelRF(xdata = t(exp_fpqm_tumor_reported), Class = stages.levels.comb,
+                                      strata = stages.levels.comb, sampsize = c(100,66))
+tumor.fpqm.varSelRF.comb.wt <-  varSelRF(xdata = t(exp_fpqm_tumor_reported), Class = stages.levels.comb,
+                                      classwt = c(1,2.5))
+
+tumor.fpqm.varSelRF.1.4 <-  varSelRF(xdata = t(exp_fpqm_tumor_reported[,union(stage.ind$`stage i`, stage.ind$`stage iv`)]),
+                                      Class = droplevels(stages.levels[union(stage.ind$`stage i`, stage.ind$`stage iv`)]))
+tumor.fpqm.varSelRF.1.4.strat <-  varSelRF(xdata = t(exp_fpqm_tumor_reported[,union(stage.ind$`stage i`, stage.ind$`stage iv`)]),
+                                      Class = droplevels(stages.levels[union(stage.ind$`stage i`, stage.ind$`stage iv`)]))
+tumor.fpqm.varSelRF.2.3.4 <- varSelRF(xdata = t(exp_fpqm_tumor_reported[,Reduce(union,stage.ind[-1])]),
+                                      Class = droplevels(stages.levels[Reduce(union,stage.ind[-1])]))
+tumor.fpqm.varSelRF.2.3.4.strat <- varSelRF(xdata = t(exp_fpqm_tumor_reported[,Reduce(union,stage.ind[-1])]),
+                                      Class = droplevels(stages.levels[Reduce(union,stage.ind[-1])]),
+                                      strata = droplevels(stages.levels[Reduce(union, stage.ind[-1])]), sampsize = c(22,25,15))
+tumor.fpqm.varSelRF.1.2 <- varSelRF(xdata = t(exp_fpqm_tumor_reported[,Reduce(union,stage.ind[c(1,2)])]),
+                                    Class = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]))
+tumor.fpqm.varSelRF.1.2.strat.1 <- varSelRF(xdata = t(exp_fpqm_tumor_reported[,Reduce(union,stage.ind[c(1,2)])]),
+                                    Class = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]),
+                                    strata = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]), 
+                                    sampsize = c(22,22))
+tumor.fpqm.varSelRF.1.2.strat.2 <- varSelRF(xdata = t(exp_fpqm_tumor_reported[,Reduce(union,stage.ind[c(1,2)])]),
+                                    Class = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]),
+                                    strata = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]), 
+                                    sampsize = c(22,22))
+tumor.fpqm.varSelRF.1.2.strat.3 <- varSelRF(xdata = t(exp_fpqm_tumor_reported[,Reduce(union,stage.ind[c(1,2)])]),
+                                    Class = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]),
+                                    strata = droplevels(stages.levels[Reduce(union,stage.ind[c(1,2)])]), 
+                                    sampsize = c(22,22))
+
+tumor.fpqm.varSelRF.3.4 <- varSelRF(xdata = t(exp_fpqm_tumor_reported[,Reduce(union,stage.ind[c(3,4)])]),
+                                    Class = droplevels(stages.levels[Reduce(union,stage.ind[c(3,4)])]))
+                                      
+
 
 save(tumor.fpqm.smt.comb.varSelRF, file = 'environment/tumor_fpqm_smote_comb_var.RData')
 save(tumor.nt.smt.comb.varSelRF, file = 'environment/tumor_nt_smote_comb_var.RData')
 save(tumor.fpqm.under.comb.varSelRF, file = 'environment/tumor_fpqm_under_comb_var.RData')
 save(tumor.nt.under.comb.varSelRF, file = 'environment/tumor_nt_under_comb_var.RData')
+save(tumor.fpqm.varSelRF.samp.rep, file = 'environment/tumor_fpqm_var_strat_rep.RData')
+save(tumor.fpqm.varSelRF.samp.not.rep, file = 'environment/tumor_fpqm_var_strat_not_rep.RData')
+save(tumor.fpqm.varSelRF.wt, file = 'environment/tumor_fpqm_var_wt.RData')
+save(tumor.fpqm.varSelRF.1.4, file = 'environment/tumor_fpqm_var_1_4.RData')
+save(tumor.fpqm.varSelRF.1.4.strat, file = 'environment/tumor_fpqm_var_1_4_strat.RData')
+save(tumor.fpqm.varSelRF.2.3.4, file = 'environment/tumor_fpqm_var_2_3_4.RData')
+save(tumor.fpqm.varSelRF.comb.wt, file = 'environment/tumor_fpqm_var_comb_wt.RData')
+save(tumor.fpqm.varSelRF.comb.strat, file = 'environment/tumor_fpqm_var_comb_strat.RData')
+save(tumor.fpqm.varSelRF.1.2, file = 'environment/tumor_fpqm_var_1_2.RData')
+save(tumor.fpqm.varSelRF.1.2.strat.1, file = 'environment/tumor_fpqm_var_1_2_strat_1.RData')
+save(tumor.fpqm.varSelRF.1.2.strat.2, file = 'environment/tumor_fpqm_var_1_2_strat_2.RData')
+save(tumor.fpqm.varSelRF.1.2.strat.3, file = 'environment/tumor_fpqm_var_1_2_strat_3.RData')
+save(tumor.fpqm.varSelRF.3.4, file = 'environment/tumor_fpqm_var_3_4.RData')
+save(tumor.fpqm.varSelRF.1.4, file = 'environment/tumor_fpqm_var_1_4.RData')
+save(tumor.fpqm.varSelRF.1.4.strat, file = 'environment/tumor_fpqm_var_1_4_strat.RData')
+save(tumor.fpqm.varSelRF.2.3.4, file = 'environment/tumor_fpqm_var_2_3_4.RData')
+save(tumor.fpqm.varSelRF.2.3.4.strat, file = 'environment/tumor_fpqm_var_2_3_4_strat.RData')
 stopCluster(cl)
+
+
+####Trying Stratified sampling####
 
 
 ###
