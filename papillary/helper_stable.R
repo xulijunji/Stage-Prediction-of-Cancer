@@ -66,10 +66,15 @@ compute.ftest <- function(data, labs)
   return(df)
 }
 
-cv.svm <- function(data, folds, stages.levels, gamma = 0, kernel = 'linear')
+cv.svm <- function(data, folds, stages.levels, gamma = 0, kernel = 'linear', cost =1,
+                   class.weights =if(length(levels(stages.levels)) == 4) c('stage i' = 1, 'stage ii' =1, 
+                              'stage iii' = 1, 'stage iv' =1)
+                            else c('stage i' = 1, 'stage iv' = 1) )
 {
+  
   folds.indexes = createFolds(1:length(rownames(data)), folds)
   #print(folds.indexes)
+  confs = list()
   for(i in seq_along(folds.indexes))
   {
     train.indexes = unlist(folds.indexes[c(-i)])
@@ -78,14 +83,19 @@ cv.svm <- function(data, folds, stages.levels, gamma = 0, kernel = 'linear')
     #print(stages.levels[test.indexes])
     length(intersect(train.indexes,test.indexes)) == 0
     svm.whole <- svm(x = data[train.indexes,],
-                     y = stages.levels[train.indexes])
+                     y = stages.levels[train.indexes], degree = 3, class.weights = class.weights, cost = cost)
     pred.svm = predict(svm.whole, data[test.indexes,])
     #print(pred.svm)
-    print(table(stages.levels[test.indexes], pred.svm))
+    error = compute.error.conf.mat(table(stages.levels[test.indexes], pred.svm))
+    confs[[i]] = cbind(table(stages.levels[test.indexes], pred.svm),error)
   }
+  return(confs)
 }
 
-cv.svm.leave.one.out <- function(data, stages.levels, gamma = 0, kernel = 'linear')
+cv.svm.leave.one.out <- function(data, stages.levels, gamma = 0, kernel = 'linear', cost = 1,
+                                class.weights =if(length(levels(stages.levels)) == 4) c('stage i' = 1, 'stage ii' =1, 
+                                                                               'stage iii' = 1, 'stage iv' =1)
+                                 else c('stage i' = 1, 'stage iv' = 1) )
 {
   output = rep(NA, nrow(data))
   for(i in seq_along(stages.levels))
@@ -93,13 +103,45 @@ cv.svm.leave.one.out <- function(data, stages.levels, gamma = 0, kernel = 'linea
     train = data[-i,]
     test = matrix(data[i,], ncol = ncol(train))
     #print(test)
-    svm.whole <- svm(x = train, y = stages.levels[-i], kernel = kernel, gamma = gamma, degree = 3)
+    svm.whole <- svm(x = train, y = stages.levels[-i], kernel = kernel, gamma = gamma, degree = 3, class.weights = class.weights, cost = cost)
     #print(ncol(test))
     #print(ncol(train))
     output[i] = predict(svm.whole, test)
     #print(pred.svm)
   }
   levels(output) = levels(stages.levels)
-  print(unique(output))
-  print(table(stages.levels, output))
+  #print(unique(output))
+  error = compute.error.conf.mat(table(stages.levels, output))
+  return(cbind(table(stages.levels, output), error))
+}
+
+compute.error.conf.mat <- function(conf.mat)
+{
+  total.samps <- apply(conf.mat, 1, sum)
+  error <- 1-diag(conf.mat)/total.samps
+  return(error)
+}
+create.mat.error <- function(conf.mat)
+{
+  return(cbind(conf.mat, compute.error.conf.mat(conf.mat)))
+}
+
+replicate.conf <- function(N, data, stages.levels, sampsize = table(stages.levels),
+                           replace = T, nodesize = 1, ntree = 5000,
+                           wt = rep(1, length(levels(stages.levels))))
+  
+{
+  a <- function()
+  {
+    rf <- randomForest(x = data, y = stages.levels, strata = stages.levels, sampsize = sampsize,
+                       replace = replace, nodesize = nodesize, ntree = ntree, classwt = wt)
+    #print(rf$confusion[,length(levels(stages.levels))+1])
+    return(rf$confusion[,length(levels(stages.levels))+1])
+  }
+  means <- replicate(N, a())
+  #print(means)
+  error <- apply(means,1,mean)
+  rf <- randomForest(x = data, y = stages.levels, strata = stages.levels, sampsize = sampsize,
+                     replace = replace, nodesize = nodesize, ntree = ntree, classwt = wt)
+  return(data.frame(cbind(rf$confusion, error)))
 }

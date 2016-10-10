@@ -1,5 +1,6 @@
 stable_genes = list()
 stable_genes_files = list.files('results/tumor/stable_gene_sel/')
+stable_genes_files = stable_genes_files[2:17]
 names.stable.genes <- c('1','2','cho','f')
 names.dfs <- c('fpqm','fpqm_log','nt','vs')
 
@@ -47,3 +48,23 @@ for(i in stable_genes_files)
 remove(f,i,j,names.dfs,names.stable.genes,stable_genes_files)
 
 length(intersect(stable_genes$fpqm$cho$V1[1:100], stable_genes$fpqm$f$indexes[1:100]))
+
+stable_genes_files_proc = list.files('results/tumor/stable_gene_sel/proc/')
+stable_genes_proc = list()
+j = 1
+names.dfs.proc = c('fpqm','vs')
+names.stable.genes.proc = c('1','2','cho')
+for(i in stable_genes_files_proc)
+{
+  quo = ceiling(j / 3)
+  rem = j %% 3
+  if(rem == 0)
+    rem = 3
+  f = read.csv(paste('results/tumor/stable_gene_sel/proc/',i,sep = ''), header = F)
+  
+  stable_genes_proc[[names.dfs.proc[quo]]][[names.stable.genes.proc[rem]]] = f
+  print(names.dfs.proc[quo])
+  print(names.stable.genes.proc[rem])
+  j = j + 1
+}
+remove(f,i,j,names.dfs.proc,names.stable.genes.proc,stable_genes_files_proc)
