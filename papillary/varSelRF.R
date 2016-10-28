@@ -112,7 +112,16 @@ tumor.fpqm.varSelRF.1.3.strat.1 <- varSelRF(xdata = t(exp_fpqm_tumor_reported[,R
 tumor.fpqm.varSelRF.2.4 <- varSelRF(xdata = t(exp_fpqm_tumor_reported[,Reduce(union,stage.ind[c(2,4)])]),
                                     Class = droplevels(stages.levels[Reduce(union,stage.ind[c(2,4)])]))
                                     
-
+tumor.fpqm.varSelRF.all <- varSelRF(xdata = t(exp_fpqm_tumor_reported[all.genes,]),
+                                    Class = stages.levels)
+tumor.fpqm.varSelRF.all <- varSelRF(xdata = t(exp_fpqm_tumor_reported[all.genes,]),
+                                    Class = stages.levels, strata = stages.levels,
+                                    sampsize = c(30,15,20,15))
+tumor.fpqm.varSelRF.diff5 <- varSelRF(xdata = t(exp_fpqm_tumor_reported[diff.genes[[5]],]),
+                                      Class = stages.levels, strata = stages.levels, sampsize = c(20,16,18,15)
+                                      )
+rf.fpqm.all <- randomForest(x = t(exp_fpqm_tumor_reported[tumor.fpqm.varSelRF.all$selected.vars,]),
+                            y = stages.levels, strata = stages.levels, sampsize = c(30,15,20,15))
 
 save(tumor.fpqm.smt.comb.varSelRF, file = 'environment/tumor_fpqm_smote_comb_var.RData')
 save(tumor.nt.smt.comb.varSelRF, file = 'environment/tumor_nt_smote_comb_var.RData')
