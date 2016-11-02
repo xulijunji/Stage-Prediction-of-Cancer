@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 load('environment/res_sam.RData')
 load('environment/res_sam_stages.RData')
 
+=======
+>>>>>>> 619901bc7b1fca206fcaa6cb0ea7456af63aa1fb
 install.packages('samr')
 library(samr)
 
@@ -35,8 +38,11 @@ res.sam <- res.sam.copy
 diff.genes.sam <- list()
 diff.genes.sam[['up']] = list()
 diff.genes.sam[['down']] = list()
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 619901bc7b1fca206fcaa6cb0ea7456af63aa1fb
 diff.genes.sam$up[['0.01_1']] =  rownames(assay(dds))[which(res.sam$siggenes.table$genes.up[,5] < 1 & 
                                                               res.sam$siggenes.table$genes.up[,4] > 1)]
 diff.genes.sam$up[['0.05_1']] =  rownames(assay(dds))[which(res.sam$siggenes.table$genes.up[,5] < 5 & 
@@ -65,8 +71,11 @@ diff.genes.sam$down[['0.05_0.97']] =  rownames(assay(dds))[which(res.sam$siggene
                                                                    res.sam$siggenes.table$genes.lo[,4] > 0.97)]
 
 length(diff.genes.sam$down$`0.05_0.99`)
+<<<<<<< HEAD
 
 ########Across Stages########################
+=======
+>>>>>>> 619901bc7b1fca206fcaa6cb0ea7456af63aa1fb
 y.sam <- c()
 for(i in stages.levels)
 {
@@ -79,6 +88,7 @@ for(i in stages.levels)
   else
     y.sam <- c(y.sam,4)
 }
+<<<<<<< HEAD
 dds_tumor_reported <- dds_tumor_reported[rowSums(assay(dds_tumor_reported)) > 2,]
 res.sam.stages <- SAMseq(x=assay(dds_tumor_reported), y = y.sam, resp.type = 'Multiclass' )
 
@@ -102,3 +112,6 @@ res.sam.stages.copy$siggenes.table$genes.up = data.frame(GeneID = res.sam.stages
 
 diff.genes.sam.stages <- list()
 diff.genes.sam.stages[[1]] = 
+=======
+res.sam.stages <- SAMseq(x=assay(dds), y = stages.levels, resp.type = 'Multiclass' )
+>>>>>>> 619901bc7b1fca206fcaa6cb0ea7456af63aa1fb
