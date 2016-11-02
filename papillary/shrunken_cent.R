@@ -1,15 +1,22 @@
+load('environment/only_tumor_reported.RData')
+load('environment/stages_levels.RData')
+load('environment/stages.level.comb.RData')
+load('environment/diff_genes.RData')
+
+source('pamr.listgenes.R')
+
 install.packages('~/pamr_1.55.tar.gz', repos = NULL, type = 'source')
 library(pamr)
 exp.train.pamr = pamr.train(list(x=as.matrix(exp_prof_tumor_reported), y=stages.levels), threshold.scale = new.scales)
 
-fpqm.train.pamr = pamr.train(list(x=as.matrix(exp_fpqm_tumor_reported), y=stages.levels))
-fpqm.cv.pamr = pamr.cv(fpqm.train.pamr, data = list(x=as.matrix(exp_fpqm_tumor_reported), y=stages.levels), nfold = 10)
+fpqm.train.pamr = pamr.train(list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels))
+fpqm.cv.pamr = pamr.cv(fpqm.train.pamr, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels), nfold = 10)
 pamr.plotcv(fpqm.cv.pamr)
-pamr.plotcen(fpqm.train.pamr, data = list(x=as.matrix(exp_fpqm_tumor_reported), y=stages.levels), threshold = 3.21)
-pamr.confusion(fpqm.train.pamr, threshold = 1)
+pamr.plotcen(fpqm.train.pamr, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels), threshold = 3.21)
+pamr.confusion(fpqm.train.pamr, threshold = 4)
 pamr.plotcvprob(fpqm.cv.pamr, data = list(x=as.matrix(exp_fpqm_tumor_reported), y=stages.levels), threshold = 5.2)
 pamr.geneplot(fpqm.train.pamr, data = list(x=as.matrix(exp_fpqm_tumor_reported), y=stages.levels), threshold = 5.2)
-listgenes(fpqm.train.pamr, data = list(x=as.matrix(exp_fpqm_tumor_reported), y=stages.levels), threshold = 5.2)
+shrunken.genes <- pamr.listgene(fpqm.train.pamr, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels), threshold = 3)
 
 fpqm.log.train.pamr = pamr.train(list(x=as.matrix(exp_fpqm_tumor_log_reported), y=stages.levels))
 fpqm.nt.train.pamr = pamr.train(list(x=as.matrix(assay(only.tumor.reported$dfs$nt)), y=stages.levels))
@@ -35,3 +42,44 @@ which.min(fpqm.train.pamr.over$errors)
 fpqm.train.pamr.over$threshold[15]
 pamr.confusion(fpqm.train.pamr.over, 3.41)
 fpqm.train.pamr.over$centroid
+
+
+#####On combined data set##############
+fpqm.train.pamr.comb <- pamr.train(list(x = as.matrix(only.tumor.reported$dfs$fpqm), y = stages.levels.comb))
+fpqm.train.pamr.comb$threshold.scale
+fpqm.cv.pamr.comb = pamr.cv(fpqm.train.pamr.comb, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels.comb), nfold = 10)
+pamr.plotcv(fpqm.cv.pamr.comb)
+pamr.plotcen(fpqm.train.pamr.comb, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels.comb), threshold = 4)
+pamr.confusion(fpqm.train.pamr.comb, threshold = 4.3)
+#pamr.plotcvprob(fpqm.cv.pamr, data = list(x=as.matrix(exp_fpqm_tumor_reported), y=stages.levels), threshold = 5.2)
+pamr.geneplot(fpqm.train.pamr.comb, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels.comb), threshold = 3.8)
+shrunken.genes <- pamr.listgene(fpqm.train.pamr.comb, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels.comb), 
+                                threshold = 4.3, fitcv = fpqm.cv.pamr.comb, genenames = T)
+
+###Using only 1 fold genes######
+fpqm.train.pamr.1fold <- pamr.train(list(x = as.matrix(only.tumor.reported$dfs$fpqm), y = stages.levels),
+                                    gene.subset = match(diff.genes[[1]], rownames(only.tumor.reported$dfs$fpqm)))
+fpqm.cv.pamr.1fold <- pamr.cv(fpqm.train.pamr.1fold, list(x = as.matrix(only.tumor.reported$dfs$fpqm), y = stages.levels)
+                                 )
+pamr.plotcv(fpqm.cv.pamr.1fold)
+pamr.confusion(fpqm.train.pamr.1fold, threshold = 3)
+
+fpqm.train.pamr.5fold <- pamr.train(list(x = as.matrix(only.tumor.reported$dfs$fpqm[diff.genes[[5]],]), y = stages.levels)
+                                 )
+fpqm.cv.pamr.5fold <- pamr.cv(fpqm.train.pamr.5fold, list(x = as.matrix(only.tumor.reported$dfs$fpqm[diff.genes[[5]],]),
+                                                          y = stages.levels))
+pamr.plotcv(fpqm.cv.pamr.5fold)
+
+fpqm.train.pamr.shrunken <-  pamr.train(list(x = as.matrix(only.tumor.reported$dfs$fpqm[as.numeric(shrunken.genes[,1]),]), y = stages.levels))
+fpqm.train.cv.shrunken <- pamr.cv(fpqm.train.pamr.shrunken, list(x = as.matrix(only.tumor.reported$dfs$fpqm[as.numeric(shrunken.genes[,1]),]),
+                                                                 y = stages.levels))
+pamr.plotcv(fpqm.train.cv.shrunken)
+pamr.confusion(fpqm.train.pamr.shrunken, threshold = 2.5)
+
+fpqm.diff.train.comb.1fold <- pamr.train(list(x = as.matrix(only.tumor.reported$dfs$fpqm[diff.genes[[1]],]), y = stages.levels.comb),
+                                         )
+fpqm.cv.pamr.1fold.comb <- pamr.cv(fpqm.diff.train.comb.1fold, list(x = as.matrix(only.tumor.reported$dfs$fpqm), y = stages.levels.comb))
+pamr.plotcv(fpqm.cv.pamr.1fold.comb)                                   
+pamr.confusion(fpqm.diff.train.comb.1fold, threshold = 2.5)
+shrunken.genes.1fold <- pamr.listgene(fpqm.diff.train.comb.1fold, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm[diff.genes[[1]],]),
+                                                                              y=stages.levels.comb),genenames = T, threshold = 2.5  )

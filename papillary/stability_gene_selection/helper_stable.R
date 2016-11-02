@@ -100,10 +100,11 @@ cv.svm.leave.one.out <- function(data, stages.levels, gamma = 0, kernel = 'linea
   output = rep(NA, nrow(data))
   for(i in seq_along(stages.levels))
   {
+    #print(i)
     train = data[-i,]
     test = matrix(data[i,], ncol = ncol(train))
     #print(test)
-    svm.whole <- svm(x = train, y = stages.levels[-i], kernel = kernel, gamma = gamma, degree = 3, class.weights = class.weights, cost = cost)
+    svm.whole <- svm(x = train, y = stages.levels[-i], kernel = kernel, gamma = gamma, degree = 1, class.weights = class.weights, cost = cost)
     #print(ncol(test))
     #print(ncol(train))
     output[i] = predict(svm.whole, test)

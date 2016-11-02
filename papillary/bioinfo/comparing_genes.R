@@ -45,5 +45,32 @@ venn.diagram(genes.list$`stage iv`, filename = 'bioinfo/stageiv/diff3_3_2.tiff')
 
 
 ####Separating the genes using only the differentially expressed w.r.t normal and tumor
+genes.list.diff <- list()
+genes.list.diff[['stage i']][['stage ii']] = get.genes(stages.comp.diff$`stage i`$`stage ii`, 2, 0.01, 1)
+genes.list.diff[['stage i']][['stage iii']] = get.genes(stages.comp.diff$`stage i`$`stage iii`, 3, 0.01, 1)
+genes.list.diff[['stage i']][['stage iv']] = get.genes(stages.comp.diff$`stage i`$`stage iv`, 3.5, 0.01, 1)
+venn.diagram(genes.list.diff$`stage i`, filename = 'images/tumor/DeSeq2/1_fold/stagei/diff2.tiff')
+venn.diagram(genes.list.diff$`stage i`, filename = 'images/tumor/DeSeq2/1_fold/stagei/diff2_2.5_2.5.tiff')
+venn.diagram(genes.list.diff$`stage i`, filename = 'images/tumor/DeSeq2/1_fold/stagei/diff2_3_3.tiff')
+venn.diagram(genes.list.diff$`stage i`, filename = 'images/tumor/DeSeq2/1_fold/stagei/diff2_3_3.5.tiff')
 
+genes.list.diff[['stage ii']][['stage i']] = get.genes(stages.comp.diff$`stage i`$`stage ii`, 2, 0.01, 1)
+genes.list.diff[['stage ii']][['stage iii']] = get.genes(stages.comp.diff$`stage ii`$`stage iii`, 3, 0.01, 1)
+genes.list.diff[['stage ii']][['stage iv']] = get.genes(stages.comp.diff$`stage ii`$`stage iv`, 3, 0.01, 1)
+venn.diagram(genes.list.diff$`stage ii`, filename = 'images/tumor/DeSeq2/1_fold/stageii/diff2.tiff')
+venn.diagram(genes.list.diff$`stage ii`, filename = 'images/tumor/DeSeq2/1_fold/stageii/diff2_2.5_2.5.tiff')
+venn.diagram(genes.list.diff$`stage ii`, filename = 'images/tumor/DeSeq2/1_fold/stageii/diff2_3_3.tiff')
 
+genes.list.diff[['stage iii']][['stage i']] = get.genes(stages.comp.diff$`stage i`$`stage iii`, 3, 0.01, 1)
+genes.list.diff[['stage iii']][['stage ii']] = get.genes(stages.comp.diff$`stage ii`$`stage iii`, 2.5, 0.01, 1)
+genes.list.diff[['stage iii']][['stage iv']] = get.genes(stages.comp.diff$`stage iii`$`stage iv`, 2, 0.01, 1)
+venn.diagram(genes.list.diff$`stage iii`, filename = 'images/tumor/DeSeq2/1_fold/stageiii/diff2.tiff')
+venn.diagram(genes.list.diff$`stage iii`, filename = 'images/tumor/DeSeq2/1_fold/stageiii/diff2_2.5_2.5.tiff')
+venn.diagram(genes.list.diff$`stage iii`, filename = 'images/tumor/DeSeq2/1_fold/stageiii/diff3_2.5_3.tiff')
+
+genes.list.diff[['stage iv']][['stage i']] = get.genes(stages.comp.diff$`stage i`$`stage iv`, 3, 0.01, 1)
+genes.list.diff[['stage iv']][['stage ii']] = get.genes(stages.comp.diff$`stage ii`$`stage iv`, 2.5, 0.01, 1)
+genes.list.diff[['stage iv']][['stage iii']] = get.genes(stages.comp.diff$`stage iii`$`stage iv`, 2, 0.01, 1)
+venn.diagram(genes.list.diff$`stage iv`, filename = 'images/tumor/DeSeq2/1_fold/stageiv/diff2.tiff')
+venn.diagram(genes.list.diff$`stage iv`, filename = 'images/tumor/DeSeq2/1_fold/stageiv/diff2.5_2.5_2.tiff')
+venn.diagram(genes.list.diff$`stage iv`, filename = 'images/tumor/DeSeq2/1_fold/stageiv/diff3_2.5_2.tiff')
