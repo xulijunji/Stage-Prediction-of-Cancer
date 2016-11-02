@@ -1,9 +1,10 @@
-<<<<<<< HEAD
+load('environment/dds.RData')
+load('environment/res.RData')
+load('environment/diff_genes.RData')
 load('environment/res_sam.RData')
 load('environment/res_sam_stages.RData')
+load('environment/only_tumor_reported.RData')
 
-=======
->>>>>>> 619901bc7b1fca206fcaa6cb0ea7456af63aa1fb
 install.packages('samr')
 library(samr)
 
@@ -21,6 +22,7 @@ for(i in seq_along(sample.info$type))
 }
 remove(j)
 dds = dds[-which(rowSums(assay(dds)) < 2),]  
+
 res.sam <- SAMseq(x=assay(dds), y = y.type, resp.type = 'Two class paired' )
 
 
@@ -30,21 +32,18 @@ for(i in seq(2))
                                       GeneName = res.sam[[4]][[i]][,2],
                                       Score = as.numeric(res.sam[[4]][[i]][,3]),
                                       FoldChange = as.numeric(res.sam[[4]][[i]][,4]),
-                                      q_value = as.numeric(res.sam[[4]][[i]][,5])
+                                      q_value = as.numeric(res.sam[[4]][[i]][,5]),
+                                      log2FC = log(as.numeric(res.sam[[4]][[i]][,4]), base = 4)
                                     )
 }
-res.sam <- res.sam.copy
 
+res.sam$siggenes.table$comb = rbind(res.sam$siggenes.table$genes.up, res.sam$siggenes.table$genes.lo)
 diff.genes.sam <- list()
-diff.genes.sam[['up']] = list()
-diff.genes.sam[['down']] = list()
-<<<<<<< HEAD
+View(assay(dds)[res.sam$siggenes.table$comb$GeneName[res.sam$siggenes.table$comb$log2FC == -Inf],])
 
 
-=======
->>>>>>> 619901bc7b1fca206fcaa6cb0ea7456af63aa1fb
-diff.genes.sam$up[['0.01_1']] =  rownames(assay(dds))[which(res.sam$siggenes.table$genes.up[,5] < 1 & 
-                                                              res.sam$siggenes.table$genes.up[,4] > 1)]
+diff.genes.sam$up[['0.01_1']] =  res.sam$siggenes.table$comb$GeneName[which(res.sam$siggenes.table$comb$q_value < 1 & 
+                                                              abs(res.sam$siggenes.table$comb$log2FC) > 1)]
 diff.genes.sam$up[['0.05_1']] =  rownames(assay(dds))[which(res.sam$siggenes.table$genes.up[,5] < 5 & 
                                                               res.sam$siggenes.table$genes.up[,4] > 1)]
 diff.genes.sam$up[['0.05_2']] =  rownames(assay(dds))[which(res.sam$siggenes.table$genes.up[,5] < 5 & 
@@ -71,11 +70,9 @@ diff.genes.sam$down[['0.05_0.97']] =  rownames(assay(dds))[which(res.sam$siggene
                                                                    res.sam$siggenes.table$genes.lo[,4] > 0.97)]
 
 length(diff.genes.sam$down$`0.05_0.99`)
-<<<<<<< HEAD
+
 
 ########Across Stages########################
-=======
->>>>>>> 619901bc7b1fca206fcaa6cb0ea7456af63aa1fb
 y.sam <- c()
 for(i in stages.levels)
 {
@@ -88,7 +85,7 @@ for(i in stages.levels)
   else
     y.sam <- c(y.sam,4)
 }
-<<<<<<< HEAD
+
 dds_tumor_reported <- dds_tumor_reported[rowSums(assay(dds_tumor_reported)) > 2,]
 res.sam.stages <- SAMseq(x=assay(dds_tumor_reported), y = y.sam, resp.type = 'Multiclass' )
 
@@ -112,6 +109,6 @@ res.sam.stages.copy$siggenes.table$genes.up = data.frame(GeneID = res.sam.stages
 
 diff.genes.sam.stages <- list()
 diff.genes.sam.stages[[1]] = 
-=======
+
 res.sam.stages <- SAMseq(x=assay(dds), y = stages.levels, resp.type = 'Multiclass' )
->>>>>>> 619901bc7b1fca206fcaa6cb0ea7456af63aa1fb
+
