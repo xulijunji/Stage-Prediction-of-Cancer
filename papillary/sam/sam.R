@@ -53,22 +53,13 @@ get.genes <- function(res, diff, q)
   return(as.numeric(levels(genes))[genes])
 }
 
-
-diff.genes.sam[['0.01_1']] =  get.genes(res.sam$siggenes.table$comb, 2, 1)
-diff.genes.sam[['0.05_1']] =  res.sam$siggenes.table$comb$GeneName[which(res.sam$siggenes.table$comb$q_value < 5 & 
-                                                                           abs(res.sam$siggenes.table$comb$log2FC) > 1)]
-diff.genes.sam[['0.05_2']] =  res.sam$siggenes.table$comb$GeneName[which(res.sam$siggenes.table$comb$q_value < 5 & 
-                                                                           abs(res.sam$siggenes.table$comb$log2FC) > 2)]
-diff.genes.sam[['0.05_3']] =  res.sam$siggenes.table$comb$GeneName[which(res.sam$siggenes.table$comb$q_value < 5 & 
-                                                                           abs(res.sam$siggenes.table$comb$log2FC) > 3)]
-diff.genes.sam[['0.05_4']] =  res.sam$siggenes.table$comb$GeneName[which(res.sam$siggenes.table$comb$q_value < 5 & 
-                                                                           abs(res.sam$siggenes.table$comb$log2FC) > 4)]
-diff.genes.sam[['0.05_5']] =  res.sam$siggenes.table$comb$GeneName[which(res.sam$siggenes.table$comb$q_value < 5 & 
-                                                                           abs(res.sam$siggenes.table$comb$log2FC) > 5)]
-
-
-
-
+diff.genes.sam[['0.01_2']] =  get.genes(res.sam$siggenes.table$comb, 2, 1)
+diff.genes.sam[['0.05_2']] =  get.genes(res.sam$siggenes.table$comb, 2, 5)
+diff.genes.sam[['0.01_4']] =  get.genes(res.sam$siggenes.table$comb, 4, 1)
+diff.genes.sam[['0.01_8']] =  get.genes(res.sam$siggenes.table$comb, 8, 1)
+diff.genes.sam[['0.01_16']] = get.genes(res.sam$siggenes.table$comb, 16, 1) 
+diff.genes.sam[['0.01_32']] = get.genes(res.sam$siggenes.table$comb, 32, 1) 
+diff.genes.sam[['0.01_64']] = get.genes(res.sam$siggenes.table$comb, 64, 1) 
 ########Across Stages########################
 y.sam <- c()
 for(i in stages.levels)
@@ -96,18 +87,18 @@ res.sam.stages$siggenes.table$genes.up <- data.frame(GeneID = res.sam.stages$sig
                                                      qvalue = as.numeric(res.sam.stages$siggenes.table$genes.up[,8]))
 diff.genes.sam.stages <- list()
 diff.genes.sam.stages[[1]] = res.sam.stages$siggenes.table$genes.up$GeneName[
-                                    abs(res.sam.stages$siggenes.table$genes.up$cont1) > 6.5 &
+                                    abs(res.sam.stages$siggenes.table$genes.up$cont1) > 7 &
                                       res.sam.stages$siggenes.table$genes.up$qvalue < 1]
 diff.genes.sam.stages[[2]] = res.sam.stages$siggenes.table$genes.up$GeneName[
-                                  abs(res.sam.stages$siggenes.table$genes.up$cont2) > 2.5 &
+                                  abs(res.sam.stages$siggenes.table$genes.up$cont2) > 3 &
                                   res.sam.stages$siggenes.table$genes.up$qvalue < 1]
 
 diff.genes.sam.stages[[3]] = res.sam.stages$siggenes.table$genes.up$GeneName[
-  abs(res.sam.stages$siggenes.table$genes.up$cont3) > 5.5 &
+  abs(res.sam.stages$siggenes.table$genes.up$cont3) > 6 &
     res.sam.stages$siggenes.table$genes.up$qvalue < 1]
 
 diff.genes.sam.stages[[4]] = res.sam.stages$siggenes.table$genes.up$GeneName[
-  abs(res.sam.stages$siggenes.table$genes.up$cont4) > 4 &
+  abs(res.sam.stages$siggenes.table$genes.up$cont4) > 4.5 &
     res.sam.stages$siggenes.table$genes.up$qvalue < 1]
 
 diff.genes.sam.stages = lapply(diff.genes.sam.stages, function(x)
@@ -117,7 +108,7 @@ diff.genes.sam.stages = lapply(diff.genes.sam.stages, function(x)
 
 names(diff.genes.sam.stages) = c(1,2,3,4)
 
-venn.diagram(diff.genes.sam.stages, filename = 'trial1.tiff')
+venn.diagram(diff.genes.sam.stages, filename = 'images/tumor/sam/7_3_6_4.5.tiff')
 
 stage.ind <- sapply(levels(stages.levels), function(x)
                     {which(stages.levels == x)})
@@ -230,3 +221,5 @@ genes.list.sam[[4]][['stageiii']] = get.genes(res.sam.pair.wise.comb[[3]]$`4`, 1
 venn.diagram(genes.list.sam[[4]], filename = 'images/tumor/sam/stages/stageiv/1_1_1.tiff')
 venn.diagram(genes.list.sam[[4]], filename = 'images/tumor/sam/stages/stageiv/4_1_1.tiff')
 venn.diagram(genes.list.sam[[4]], filename = 'images/tumor/sam/stages/stageiv/8_1_1.tiff')
+
+genes.list.sam.

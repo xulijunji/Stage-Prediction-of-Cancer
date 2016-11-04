@@ -4,6 +4,8 @@
 library(e1071)
 library(caret)
 library(class)
+load('environment/stable_genes.RData')
+load('environment/req_dfs.RData')
 
 ##KNN
 ##Based on 1

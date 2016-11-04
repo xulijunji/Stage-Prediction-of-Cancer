@@ -31,8 +31,8 @@ stage.comp[['stage iii']] <- comp.res(dds_tumor_reported,'stage', 'stage iii',c(
 
 stages.comp.diff <- list()
 stages.comp.diff[['stage i']] <- comp.res(dds_tumor_reported[diff.genes[[1]],], 'stage', 'stage i', c('stage ii', 'stage iii', 'stage iv'))
-stage.comp.diff[['stage ii']] <- comp.res(dds_tumor_reported[diff.genes[[1]],],'stage', 'stage ii',c('stage iii', 'stage iv'))
-stage.comp.diff[['stage iii']] <- comp.res(dds_tumor_reported[diff.genes[[1]],],'stage', 'stage iii',c('stage iv'))
+stages.comp.diff[['stage ii']] <- comp.res(dds_tumor_reported[diff.genes[[1]],],'stage', 'stage ii',c('stage iii', 'stage iv'))
+stages.comp.diff[['stage iii']] <- comp.res(dds_tumor_reported[diff.genes[[1]],],'stage', 'stage iii',c('stage iv'))
 
 get.genes.cont <- function(stage.comp, logfc, adj.pval = NULL, pval = NULL)
 {

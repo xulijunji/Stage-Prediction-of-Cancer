@@ -4,19 +4,19 @@ library(randomForest)
 library(e1071)
 source('../stability_gene_selection/helper_stable.R')
 
-load('../environment/stages_levels.RData')
-load('../environment/diff_genes.RData')
-load('../environment/filter_based_genes.RData')
-load('../environment/only_tumor_reported.RData')
+load('environment/stages_levels.RData')
+load('environment/diff_genes.RData')
+load('environment/filter_based_genes.RData')
+load('environment/only_tumor_reported.RData')
 
 filter.based.genes = list()
 data.fpqm.filter = t(only.tumor.reported$dfs$fpqm)
 data.fpqm.filter.diff1 <- data.fpqm.filter[,diff.genes[[1]]]
-data.fpqm.filter.diff1$class = stages.levels
+data.fpqm.filter$class = stages.levels
 typeof(as.data.frame(data.fpqm.filter))
 filter.based.genes[['cfs']] = select.cfs(data.fpqm.filter.diff)
-filter.based.genes[['ffilter']] = select.fast.filter(data.fpqm.filter.diff, 'MDL', 0.1,numeric())
-filter.based.genes[['ffilter']] = select.fast.filter(data.fpqm.filter.diff, 'MDL', 0.05,numeric())
+filter.based.genes[['ffilter']] = select.fast.filter(data.fpqm.filter, 'MDL', 0.1,numeric())
+                                                                                                                                                  filter.based.genes[['ffilter']] = select.fast.filter(data.fpqm.filter.diff, 'MDL', 0.05,numeric())
 filter.based.genes[['fcor']] = select.forward.Corr(data.fpqm.filter.diff1, 'MDL', numeric())
 save(filter.based.genes, file = 'environment/filter_based_genes.RData')
 load('environment/filter_based_genes.RData')

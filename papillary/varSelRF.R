@@ -148,6 +148,7 @@ save(tumor.fpqm.varSelRF.1.3.strat.1, file = 'environment/tumor_fpqm_var_1_3_str
 save(tumor.fpqm.varSelRF.1.3.strat.2, file = 'environment/tumor_fpqm_var_1_3_strat_2.RData')
 stopCluster(cl)
 
+load('environment/tumor_fpqm_var.RData')
 load('environment/tumor_fpqm_var_1_2.RData')
 load('environment/tumor_fpqm_var_1_2_strat_1.RData')
 load('environment/tumor_fpqm_var_1_2_strat_2.RData')
@@ -157,6 +158,20 @@ load('environment/tumor_fpqm_var_2_3_4.RData')
 load('environment/tumor_fpqm_var_2_3_4_strat.RData')
 load('environment/tumor_fpqm_var_1_4.RData')
 load('environment/tumor_fpqm_var_1_4_strat.RData')
+load('environment/tumor_fpqm_var_1_3.RData')
+load('environment/tumor_fpqm_var_1_3_strat_1.RData')
+load('environment/tumor_fpqm_var_1_3_strat_2.RData')
+load('environment/tumor_fpqm_var_2_4.RData')
+load('environment/tumor_fpqm_var_2_4.RData')
+load('environment/tumor_fpqm_var_2_3.RData')
+load('environment/tumor_fpqm_var_2_3_strat1.RData')
+load('environment/tumor_fpqm_')
+genes.varselrf = list()
+genes.varselrf[['fpqm']] = remove.dots(unlist(strsplit(as.character(tumor.fpqm.varSelRF$selec.history$Vars.in.Forest[25]),
+                                    " + ", fixed = T)))
+genes.varselrf[['var_1_2']] = unlist(strsplit(as.character(tumor.fpqm.varSelRF.1.2$selec.history$Vars.in.Forest[25]),
+                                    " + ", fixed = T))
+
 ####Trying Stratified sampling####
 
 
