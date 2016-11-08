@@ -10,7 +10,7 @@ load('environment/filter_based_genes.RData')
 load('environment/only_tumor_reported.RData')
 
 filter.based.genes = list()
-data.fpqm.filter = t(only.tumor.reported$dfs$fpqm)
+data.fpqm.filter = req.dfs$fpqm
 data.fpqm.filter.diff1 <- data.fpqm.filter[,diff.genes[[1]]]
 data.fpqm.filter$class = stages.levels
 typeof(as.data.frame(data.fpqm.filter))
@@ -22,7 +22,7 @@ save(filter.based.genes, file = 'environment/filter_based_genes.RData')
 load('environment/filter_based_genes.RData')
 intersect(filter.based.genes$cfs$Biomarker, filter.based.genes$ffilter$Biomarker)
 
-pred.knn.fpqm.fastcorr <- knn.cv(data.fpqm.filter[,filter.based.genes$ffilter$Biomarker[1:6]], cl = stages.levels, k = 3)
+pred.knn.fpqm.fastcorr <- knn.cv(data.fpqm.filter[,filter.based.genes$ffilter$Biomarker[1:76]], cl = stages.levels, k = 3)
 create.mat.error(table(stages.levels, pred.knn.fpqm.fastcorr))
 
 pred.knn.fpqm.cfs <- knn.cv(data.fpqm.filter[,filter.based.genes$cfs$Biomarker], cl = stages.levels, k = 5)
@@ -40,8 +40,6 @@ svm.fastcorr <- cv.svm.leave.one.out(data.fpqm.filter[,filter.based.genes$ffilte
                                      cost = 1, class.weights = c('stage i' = 1, 'stage ii' = 5, 'stage iii' = 3, 'stage iv' = 7))
 
 svm.cfs <- cv.svm.leave.one.out(data.fpqm.filter[,filter.based.genes$cfs$Biomarker], stages.levels)
-
-gamma = 0, kernel = 'linear', cost = 1,
-class.weights =if(length(levels(stages.levels)) == 4) c('stage i' = 1, 'stage ii' =1, 
-                                                        'stage iii' = 1, 'stage iv' =1)
-else c('stage i' = 1, 'stage iv' = 1)
+svm.cfs
+svm.fastcorr <- cv.svm.leave.one.out(data.fpqm.filter[,filter.based.genes$ffilter$Biomarker], stages.levels)
+svm.fastcorr

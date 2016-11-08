@@ -28,6 +28,7 @@ train.indexes = c(c(1:150,200:240,250:260))
 lda.dds.train <- lda(x = t(assay(dds_tumor_reported[diff.genes[[5]],train.indexes])), 
                      grouping = stages.levels[train.indexes])
 lda.dds.test <- predict(lda.dds.train, 
-                        newdata = t(assay(dds_tumor_reported[diff.genes[[5]],])))
-rf.lda <- randomForest(lda.dds.test$x, stages.levels)
+                        newdata = t(assay(dds_tumor_reported[diff.genes[[5]],-train.indexes])))
+table(lda.dds.test$class)
+rf.lda <- randomForest(lda.dds.test$x, stages.levels[train.indexes])
 rf.lda$confusion
