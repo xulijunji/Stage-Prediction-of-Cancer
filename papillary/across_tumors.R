@@ -1,5 +1,5 @@
 ###Compare genes across different stages of tumors
-
+###This module contains code that generates the output of result(DESeq2) comparing stages with each other
 library(DESeq2)
 ##This is the preliminary analysis for the initial over sampling genes found using varselRF
 length(over.sel.genes)
@@ -17,7 +17,9 @@ comp.res <- function(dds_comp, contrast, stages.cont, stages.tum)
 {
   stages.comp.cont <- lapply(stages.tum, function(x)
   {
-    results(dds_comp, contrast = c(contrast, x, stages.cont))
+    res = results(dds_comp, contrast = c(contrast, x, stages.cont))
+    indexes = is.na(res[,5]) & is.na(res[,6])
+    res = res[,!indexes]
   })
   names(stages.comp.cont) = stages.tum
   return(stages.comp.cont)

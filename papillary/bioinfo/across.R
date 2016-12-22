@@ -1,3 +1,6 @@
+##Contains the code for PCA plots for stages using all genes for all stages as well for individual stages
+##using different feature selection technique so far
+
 library(factoextra)
 library(FactoMineR)
 library(DESeq2)

@@ -1,3 +1,5 @@
+##Generates the genes using indiviudal pair wise results comparisons of stages of DESeq 
+
 install.packages('VennDiagram')
 library('VennDiagram')
 
