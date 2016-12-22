@@ -3,7 +3,7 @@ replace.symbol <- function(sym.list, replace.with, to.replace)
   sapply(sym.list, function(x)
     {
     temp <- unlist(strsplit(x, to.replace, fixed = T))
-    paste(temp, collapse = '-')
+    paste(temp, collapse = replace.with)
   })
 }
 

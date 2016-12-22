@@ -2,9 +2,17 @@
 ##We use exp_prof from Feature_Extract.R or load it from our cancer directory
 ##Note that we had 32 normal samples
 ##But for 1 normal sample we dont have matched tumor its id is 182
+
+load('environment/exp_fpqm.RData')
+load('environment/df_stages_rep.RData')
+load('environment/df_stages.RData')
+load('environment/sample_info.RData')
+
+sample.ids <- colnames(exp_fpqm)
+sample.ids <- replace.symbol(sample.ids, '-', '.')
 labels = sapply(sample.ids,function(x) ##Normal or Tumor (01 or 11) 
 {
-  unlist(strsplit(x,split = '-', fixed = T))[4]
+  unlist(strsplit(x,split = '.', fixed = T))[4]
 })
 sum(is.na(labels)) == 0
 type = sapply(labels, function(x)
@@ -24,6 +32,8 @@ pats = sapply(sample.ids,function(x) ##Patients
 length(unique(pats))
 normal.indexes = which(type == 'N')
 tumor.indexes = which(type == 'T')
+tumor.indexes.reported = tumor.indexes[match(replace.symbol(as.character(df.stage.tumor.rep$sample.id),'.','-'),
+                                             names(tumor.indexes))]
 diff.ids = c() ##ids of samples to be taken for finding degs
 
 for(i in normal.indexes)
@@ -64,5 +74,14 @@ for(i in seq_along(diff.ids))
 
 sample.info$type = as.factor(sample.info$type)  ##Needed for design matrix
 sample.info$pat.nums = as.factor(sample.info$pat.nums)
+sample.info$pat.nums = df.stages$short.id[match(sample.info$pat.ids, df.stages$patient.id)]
 
+match.control.indexes <- match(sample.info$pat.nums, df.stages$short.id)
+match.control.indexes <- unique(match.control.indexes)
+match.control.indexes.rep <- match(sample.info$pat.nums, df.stage.tumor.rep$short.id)
+match.control.indexes.rep <- unique(match.control.indexes.rep)
 
+View(df.stages[match.control.indexes,])
+View(sample.info)
+table(df.stages[match.control.indexes,]$stage)
+table(df.stage.tumor.rep[match.control.indexes.rep,]$stage)
