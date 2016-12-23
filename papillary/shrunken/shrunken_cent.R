@@ -4,6 +4,7 @@ load('environment/stages.level.comb.RData')
 load('environment/diff_genes.RData')
 
 source('pamr.listgenes.R')
+library(DESeq2)
 
 install.packages('~/pamr_1.55.tar.gz', repos = NULL, type = 'source')
 library(pamr)
@@ -13,11 +14,17 @@ fpqm.train.pamr = pamr.train(list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=s
 fpqm.cv.pamr = pamr.cv(fpqm.train.pamr, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels), nfold = 10)
 pamr.plotcv(fpqm.cv.pamr)
 pamr.plotcen(fpqm.train.pamr, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels), threshold = 3.21)
-pamr.confusion(fpqm.train.pamr, threshold = 3)
+pamr.confusion(fpqm.train.pamr, threshold = 4.3)
 pamr.plotcvprob(fpqm.cv.pamr, data = list(x=as.matrix(exp_fpqm_tumor_reported), y=stages.levels), threshold = 5.2)
 pamr.geneplot(fpqm.train.pamr, data = list(x=as.matrix(exp_fpqm_tumor_reported), y=stages.levels), threshold = 5.2)
 shrunken.genes <- pamr.listgene(fpqm.train.pamr, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels), threshold = 3)
 
+
+#######vst
+exp.train.pamr.vst = pamr.train(list(x=as.matrix(assay(only.tumor.reported$dfs$vs)), y=stages.levels))
+exp.cv.pamr.vst = pamr.cv(exp.train.pamr.vst, list(x=as.matrix(assay(only.tumor.reported$dfs$vs)), y=stages.levels))
+pamr.plotcv(exp.cv.pamr.vst)
+pamr.confusion(exp.train.pamr.vst,4.5)
 # fpqm.log.train.pamr = pamr.train(list(x=as.matrix(exp_fpqm_tumor_log_reported), y=stages.levels))
 # fpqm.nt.train.pamr = pamr.train(list(x=as.matrix(assay(only.tumor.reported$dfs$nt)), y=stages.levels))
 # 
@@ -61,6 +68,13 @@ shrunken.genes <- pamr.listgene(fpqm.train.pamr.comb, data = list(x=as.matrix(on
                                 threshold = 4.3, fitcv = fpqm.cv.pamr.comb, genenames = T)
 
 
+vt.train.pamr.comb <- pamr.train(list(x = as.matrix(assay(only.tumor.reported$dfs$vs)), 
+                                      y = stages.levels.comb))
+vt.cv.pamr.comb = pamr.cv(vt.train.pamr.comb,
+                          data = list(x=as.matrix(assay(only.tumor.reported$dfs$vs)),
+                                      y=stages.levels.comb), nfold = 10)
+pamr.plotcv(vt.cv.pamr.comb)
+pamr.confusion(vt.train.pamr.comb, threshold = 4.3)
 ###Using only 1 fold genes######
 fpqm.train.pamr.1fold <- pamr.train(list(x = as.matrix(only.tumor.reported$dfs$fpqm), y = stages.levels),
                                     gene.subset = match(diff.genes[[1]], rownames(only.tumor.reported$dfs$fpqm)))
