@@ -116,16 +116,7 @@ cv.svm.leave.one.out <- function(data, stages.levels, gamma = 0, kernel = 'linea
   return(cbind(table(stages.levels, output), error))
 }
 
-compute.error.conf.mat <- function(conf.mat)
-{
-  total.samps <- apply(conf.mat, 1, sum)
-  error <- 1-diag(conf.mat)/total.samps
-  return(error)
-}
-create.mat.error <- function(conf.mat)
-{
-  return(cbind(conf.mat, compute.error.conf.mat(conf.mat)))
-}
+
 
 replicate.conf <- function(N, data, stages.levels, sampsize = table(stages.levels),
                            replace = T, nodesize = 1, ntree = 5000,

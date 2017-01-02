@@ -3,8 +3,9 @@ load('environment/stages_levels.RData')
 load('environment/stages.level.comb.RData')
 load('environment/diff_genes.RData')
 
-source('pamr.listgenes.R')
+source('shrunken/pamr.listgenes.R')
 library(DESeq2)
+library(pROC)
 
 install.packages('~/pamr_1.55.tar.gz', repos = NULL, type = 'source')
 library(pamr)
@@ -21,10 +22,20 @@ shrunken.genes <- pamr.listgene(fpqm.train.pamr, data = list(x=as.matrix(only.tu
 
 
 #######vst
-exp.train.pamr.vst = pamr.train(list(x=as.matrix(assay(only.tumor.reported$dfs$vs)), y=stages.levels))
-exp.cv.pamr.vst = pamr.cv(exp.train.pamr.vst, list(x=as.matrix(assay(only.tumor.reported$dfs$vs)), y=stages.levels))
+exp.train.pamr.vst = pamr.train(list(x=as.matrix(t(req.dfs$fpqm)), 
+                                     y=stages.levels))
+exp.cv.pamr.vst = pamr.cv(exp.train.pamr.vst, list(x=as.matrix(t(req.dfs$fpqm)),
+                                                   y=stages.levels))
 pamr.plotcv(exp.cv.pamr.vst)
-pamr.confusion(exp.train.pamr.vst,4.5)
+pamr.confusion(exp.cv.pamr.vst, threshold = 3.8)
+table(stages.levels.comb, exp.cv.pamr.vst$yhat[,20])
+typeof(pamr.confusion(exp.cv.pamr.vst,3.71))
+
+sensitivity(table(stages.levels.comb, stages.levels.comb))
+a = confusionMatrix(exp.cv.pamr.vst$yhat[,20],stages.levels) 
+multiclass.roc(stages.levels, ordered(exp.cv.pamr.vst$yhat[,17]))
+##Note that Caret we write the transpose of confusion matrix compared to that of others
+
 # fpqm.log.train.pamr = pamr.train(list(x=as.matrix(exp_fpqm_tumor_log_reported), y=stages.levels))
 # fpqm.nt.train.pamr = pamr.train(list(x=as.matrix(assay(only.tumor.reported$dfs$nt)), y=stages.levels))
 # 
@@ -62,6 +73,8 @@ fpqm.cv.pamr.comb = pamr.cv(fpqm.train.pamr.comb, data = list(x=as.matrix(only.t
 pamr.plotcv(fpqm.cv.pamr.comb)
 pamr.plotcen(fpqm.train.pamr.comb, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels.comb), threshold = 4)
 pamr.confusion(fpqm.train.pamr.comb, threshold = 4.3)
+roc(stages.levels.comb, ordered(fpqm.cv.pamr.comb$yhat[,15]))
+confusionMatrix(fpqm.cv.pamr.comb$yhat[,15], stages.levels.comb)
 #pamr.plotcvprob(fpqm.cv.pamr, data = list(x=as.matrix(exp_fpqm_tumor_reported), y=stages.levels), threshold = 5.2)
 pamr.geneplot(fpqm.train.pamr.comb, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels.comb), threshold = 3.8)
 shrunken.genes <- pamr.listgene(fpqm.train.pamr.comb, data = list(x=as.matrix(only.tumor.reported$dfs$fpqm), y=stages.levels.comb), 
