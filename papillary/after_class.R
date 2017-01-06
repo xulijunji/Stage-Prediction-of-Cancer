@@ -18,5 +18,6 @@ plot.auc <- function(cv, stages.levels)
     multiclass.roc(stages.levels, ordered(cv$yhat[,x]))$auc
   })
   #print(aucs)
-  plot(seq_along(thresh), aucs)
+  x <- seq(thresh)
+  plot(x, aucs)
 }
