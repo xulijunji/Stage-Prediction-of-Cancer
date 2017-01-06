@@ -1,4 +1,8 @@
 ###Contains stage wise separation
+library(pamr)
+source('shrunken/pamr.listgenes.R')
+source('after_class.R')
+load('environment/stages_levels.RData')
 
 stage.index.san4 <- sort(Reduce(union, stage.ind[-4]))
 mapply(function(x,y)
@@ -21,4 +25,11 @@ vs.cv.1.2 <- pamr.cv(vs.train.1.2, list(x = as.matrix(t(req.dfs$vs[stage.index.1
                           y = droplevels(stages.levels[stage.index.1.2])))
 pamr.plotcv(vs.cv.1.2)
 plot.auc(vs.cv.1.2, droplevels(stages.levels[stage.index.1.2]))
-pamr.confusion(vs.cv.1.2, threshold = vs.cv.1.2$threshold[12])
+pamr.confusion(vs.cv.1.2, threshold = vs.cv.1.2$threshold[9])
+shrunken.genes.vs.1.2 <- pamr.listgene(vs.train.1.2, data = list(x=as.matrix(t(req.dfs$vs)),
+                                                y=droplevels(stages.levels[stage.index.1.2])), 
+                                       threshold = vs.cv.1.2$threshold[12],
+                                       fitcv = vs.cv.1.2, genenames = T)
+View(shrunken.genes.vs.1.2)
+shrunken.genes.vs.1.2.st1 <- get.shrunken.stage.wise.genes(shrunken.genes.vs.1.2, 3, 6, 0.8)
+shrunken.genes.vs.1.2.st2 <- get.shrunken.stage.wise.genes(shrunken.genes.vs.1.2, 4, 6, 0.8)

@@ -62,6 +62,13 @@ if(!is.null(fitcv)){
   res <- cbind(as.character(g1), g, d, av.rank, prop)[gene.order,,drop=F]
   dimnames(res) <- list(NULL, c("id", gnhdr, schdr, "av-rank-in-CV", "prop-selected-in-CV"))
 }
-  print(res, quote = FALSE)
+  return(res)
 }
 
+
+get.shrunken.stage.wise.genes <- function(shrunken.gene.df, stage.ind, threshold.ind, threshold)
+{
+  genes <- shrunken.gene.df[,2][which(as.numeric(shrunken.gene.df[,stage.ind]) > 0 &
+                                        as.numeric(shrunken.gene.df[, threshold.ind]) > threshold)]
+  return(genes)
+}
