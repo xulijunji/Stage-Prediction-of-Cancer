@@ -9,6 +9,7 @@ replace.symbol <- function(sym.list, replace.with, to.replace)
 
 get.imp.genes <- function(method, assay, number)
 {
+
   if(typeof(assay) == 'S4')
     assay = assay(assay)
   if(method == 1) ###most expression
