@@ -3,7 +3,10 @@ load('environment/req_dfs.RData')
 load('environment/stage.index.RData')
 
 library(DESeq2)
-library()
+library(pheatmap)
 library("RColorBrewer")
 library("gplots")
-heatmap(req.dfs$vs[stage.ind$`stage ii`,shrunken.genes.vs.1.2.st2])
+stage.index.1.2 <- Reduce(union, stage.ind[c(1,2)])
+pheatmap(req.dfs$vs[stage.index.1.2,shrunken.genes.vs.1.2.st2],
+         labels_row = stages.levels[stage.index.1.2],
+         )

@@ -1,4 +1,5 @@
 ####Deals with after classification with the output that comes###########
+library(pROC)
 compute.error.conf.mat <- function(conf.mat)
 {
   total.samps <- apply(conf.mat, 1, sum)

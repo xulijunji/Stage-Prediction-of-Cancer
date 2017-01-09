@@ -9,6 +9,18 @@ diff.genes[[1]] = rownames(res)[intersect(which(abs(res$log2FoldChange) > 1),  w
 diff.genes[[1]] = remove.dots(diff.genes[[1]])
 names(diff.genes) = c(1,2,3,4,5)
 
+stage.comp = list()
+stage.comp[['stage i']] <- comp.res(dds_tumor_reported,'stage', 'stage i',c('stage ii', 'stage iii', 'stage iv'))
+stage.comp[['stage ii']] <- comp.res(dds_tumor_reported,'stage', 'stage ii',c('stage iii', 'stage iv'))
+stage.comp[['stage iii']] <- comp.res(dds_tumor_reported,'stage', 'stage iii',c('stage iv'))
+
+stages.comp.diff <- list()
+stages.comp.diff[['stage i']] <- comp.res(dds_tumor_reported[diff.genes[[1]],], 'stage', 'stage i', c('stage ii', 'stage iii', 'stage iv'))
+stages.comp.diff[['stage ii']] <- comp.res(dds_tumor_reported[diff.genes[[1]],],'stage', 'stage ii',c('stage iii', 'stage iv'))
+stages.comp.diff[['stage iii']] <- comp.res(dds_tumor_reported[diff.genes[[1]],],'stage', 'stage iii',c('stage iv'))
+
+
+
 ###Using variable from across_tumors.R stage.comp, genes.list and function get.gene
 genes.list = list()
 
