@@ -46,9 +46,7 @@ load('environment/stages.level.comb.RData')
 load('environment/diff_genes.RData')
 
 source('shrunken/pamr.listgenes.R')
-library(DESeq2)
-library(pROC)
-library(pamr)
+
 
 
 ########All Classes##############
