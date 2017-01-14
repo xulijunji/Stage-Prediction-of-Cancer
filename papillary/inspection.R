@@ -18,3 +18,19 @@ pca.most.var <- PCA(vs.normal.tumor.reported.varying)
 fviz_pca_ind(pca.most.var, habillage = stages.levels, 
              geom = c('point'))
 res.hcpc <- HCPC(pca.most.var, nb.clust = 4)
+plot(x = res.hcpc, choice = 'factor', ind.names = T, centers.plot = T,
+     new.plot = T)
+
+fit <- hkmeans(vs.normal.tumor.reported.varying, 4)
+table(stages.levels, fit$cluster)
+fit.kmeans <- kmeans(vs.normal.tumor.reported.varying, 4)
+table(stages.levels, fit.kmeans$cluster)
+
+fit.comb.kmeans <- kmeans(req.dfs$vs[,pamr.genes.comb[[5]]], 4)
+table(stages.levels.comb, fit.comb.kmeans$cluster)
+
+library(ConsensusClusterPlus)
+fit.try <- ConsensusClusterPlus(d = t(vs.normal.tumor.reported.varying),
+                                maxK = 4)
+View(fit.try[[2]]$consensusMatrix)
+

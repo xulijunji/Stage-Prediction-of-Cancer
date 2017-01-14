@@ -35,3 +35,30 @@ get.stage.distribution <- function(gr, stages)
   })
   return(stage.dist)
 }
+
+cv.svm <- function(data, folds, stages.levels, gamma = 0, kernel = 'linear', cost =1,
+                   class.weights =if(length(levels(stages.levels)) == 4) c('stage i' = 1, 'stage ii' =1, 
+                                                                           'stage iii' = 1, 'stage iv' =1)
+                   else c('stage i' = 1, 'stage iv' = 1))
+{
+  total.samp <- length(rownames(data))
+  gr <- build.groups(total.samp, folds)
+  if(length(gr) != folds)
+    return('kat gaya')
+  
+  predicted <- rep(c('stage i'), total.samp/2)
+  for(i in seq(folds))
+  {
+    train.index = sort(unlist(gr[-i]))
+    test.index = sort(unlist(gr[i]))
+    svm.model <- svm(x = data[train.index, ], y = stages.levels[train.index], kernel = kernel, gamma = gamma)
+    #print(levels(stages.levels[train.index]))
+    #print(svm.model$levels)
+    pr <- predict(svm.model, data[test.index, ])
+    #print(pr)
+    predicted[test.index] <- pr
+  }
+  predicted <- factor(predicted, labels = levels(stages.levels))
+  
+  return(predicted)
+}
