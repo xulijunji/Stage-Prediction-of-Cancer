@@ -1,4 +1,6 @@
 library(pamr)
+library(pROC)
+library(caret)
 
 build.groups <- function(total.samples, num.group)
 {
@@ -79,6 +81,46 @@ cv.svm <- function(data, folds, stages.levels, gamma = 0, kernel = 'linear', cos
   return(predicted)
 }
 
+cv.knn <- function(data, folds, stages.levels, k)
+{
+  library(class)
+  total.samp <- length(rownames(data))
+  gr <- build.groups(total.samp, folds)
+  
+  if(length(gr) != folds)
+    return('kat gaya')
+  predicted <- factor(rep(c('stage i'), total.samp), levels = c('stage i', 'stage iv'))
+  for(i in seq(folds))
+  {
+    train.index = sort(unlist(gr[-i]))
+    test.index = sort(unlist(gr[i]))
+    predicted[test.index] <- knn(train = data[train.index, ], test = data[test.index,], k = k, 
+                                 cl = stages.levels[train.index])
+  }
+  return(predicted)
+}
+
+cv.naiveBayes <- function(data, folds, stages.levels)
+{
+  library(e1071)
+  total.samp <- length(rownames(data))
+  gr <- build.groups(total.samp, folds)
+  
+  if(length(gr) != folds)
+    return('kat gaya')
+  predicted <- factor(rep(c('stage i'), total.samp), levels = c('stage i', 'stage iv'))
+  for(i in seq(folds))
+  {
+    train.index = sort(unlist(gr[-i]))
+    test.index = sort(unlist(gr[i]))
+    nb.model <- naiveBayes(x = data[train.index, ], y = stages.levels[train.index])
+    
+    predicted[test.index] <- predict(nb.model, data[test.index,])
+  }
+  return(predicted)
+}
+
+
 get.results <- function(actual.cv, pred.cv, actual.test, pred.test, conf.mat, eval.mat, classifier, i)
 {
   library(caret)
@@ -107,4 +149,18 @@ get.results <- function(actual.cv, pred.cv, actual.test, pred.test, conf.mat, ev
   eval.mat[[classifier]][['test']][['auc']][[i]] <- multiclass.roc(actual.test, ordered(pred.test))$auc
   eval.mat[[classifier]][['test']][['other']][[i]] <- confusionMatrix(pred.test, actual.test)
   return(list(conf.mat, eval.mat))
+}
+
+find.best.k <- function(data, folds, stages.levels)
+{
+  library(pROC)
+  cv.pred <- lapply(seq(10), function(k){
+      cv.knn(data, folds, stages.levels, k)
+      })
+  aucs <- sapply(seq(10), function(k)
+  {
+    multiclass.roc(stages.levels, ordered(cv.pred[[k]]))$auc
+  })
+  k <- which.max(aucs)
+  return(list(k, cv.pred[[k]]))
 }
