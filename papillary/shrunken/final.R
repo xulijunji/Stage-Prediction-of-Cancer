@@ -5,13 +5,6 @@ library(randomForest)
 library(e1071)
 
 
-pamr.train.comb <- list()
-pamr.cv.comb <- list()
-pamr.genes.comb <- list()
-pamr.predicted.comb <- list()
-pamr.aucs.comb <- list()
-confusion.mat <- list()
-eval.mat <- list()
 
 do.shrunken <- function(gr, data, stages.levels, confusion.mat, eval.mat)
 {
@@ -53,18 +46,18 @@ do.shrunken <- function(gr, data, stages.levels, confusion.mat, eval.mat)
 
 
 #######Trial########
-g <- pamr.listgene(pamr.train.comb[[1]], 
-                   data = list(x=as.matrix(t(req.dfs$vs[unlist(gr[-1]),])),
-                               y=stages.levels.comb[unlist(gr[-1])]), 
-                   threshold = pamr.cv.comb[[1]]$threshold[15],
-                   fitcv = pamr.cv.comb[[i]], genenames = T)[,2]
-stages <- pamr.predict(pamr.train.comb[[2]], 
-                       as.matrix(t(req.dfs$vs[gr[[2]],])),
-                       pamr.cv.comb[[2]]$threshold[17])
-table(stages)
-table(stages.levels.comb[gr[[2]]], stages)
-pamr.confusion(pamr.cv.comb[[1]], threshold = pamr.cv.comb[[1]]$threshold[17])
-plot(pamr.aucs.comb[[1]])
+# g <- pamr.listgene(pamr.train.comb[[1]], 
+#                    data = list(x=as.matrix(t(req.dfs$vs[unlist(gr[-1]),])),
+#                                y=stages.levels.comb[unlist(gr[-1])]), 
+#                    threshold = pamr.cv.comb[[1]]$threshold[15],
+#                    fitcv = pamr.cv.comb[[i]], genenames = T)[,2]
+# stages <- pamr.predict(pamr.train.comb[[2]], 
+#                        as.matrix(t(req.dfs$vs[gr[[2]],])),
+#                        pamr.cv.comb[[2]]$threshold[17])
+# table(stages)
+# table(stages.levels.comb[gr[[2]]], stages)
+# pamr.confusion(pamr.cv.comb[[1]], threshold = pamr.cv.comb[[1]]$threshold[17])
+# plot(pamr.aucs.comb[[1]])
 ##########
 
 ####Random Forests
