@@ -164,3 +164,67 @@ find.best.k <- function(data, folds, stages.levels)
   k <- which.max(aucs)
   return(list(k, cv.pred[[k]]))
 }
+
+get.genes.shrunken <- function(shrunken.genes.df.list)
+{
+  genes = list()
+  for(i in seq_along(shrunken.genes.df.list))
+  {
+    genes[[i]] = shrunken.genes.df.list[[i]][,2]
+  }
+  return(genes)
+}
+
+get.intersect.genes <- function(genes.list, indexes)
+{
+  return(Reduce(intersect, genes.list[indexes]))
+}
+
+create.heatmap <- function(data, stages, genes, col = NULL, labs = NULL)
+{
+  library(pheatmap)
+  stage.ind.levels <- list()
+  if(length(stages) != length(rownames(data)))
+    print('damn')
+  for(i in seq_along(levels(stages)))
+  {
+    stage = levels(stages)[i]
+    stage.ind.levels[[stage]] = which(stages == stage)
+  }
+  row.indexes <- Reduce(union, stage.ind.levels)
+  #print(row.indexes)
+  annotation_col = data.frame(names = stages[row.indexes])
+  rownames(annotation_col) = rownames(data)[row.indexes]
+  #print(stages[row.indexes])
+  if(!is.null(labs))
+    labs = rownames(data)[row.indexes]
+  pheatmap(t(data[row.indexes, genes]),
+           labels_col = labs,
+           show_colnames = F,
+           cluster_cols = F, 
+           annotation_col = annotation_col,
+           color = col)
+}
+  
+get.genes.common <- function(genes.list, max.no.of.models)
+{
+  total.genes <- Reduce(union, genes.list)
+  genes.req <- c()
+  for(i in total.genes)
+  {
+     count = 0
+     for(j in seq_along(genes.list))
+     {
+       if(i %in%  genes.list[[j]])
+         count = count + 1
+       if(count == max.no.of.models)
+       {
+         genes.req <- c( genes.req, i)
+         break
+       }
+     }
+   }
+   return(genes.req)
+}
+
+  

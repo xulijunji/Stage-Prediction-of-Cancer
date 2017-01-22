@@ -10,6 +10,7 @@ do.shrunken <- function(gr, data, stages.levels, confusion.mat, eval.mat)
 {
   for(i in seq_along(gr))
   {
+    
     train.ind <- sort(unlist(gr[-i]))
     test.ind <- sort(unlist(gr[i]))
     pamr.train.comb[[i]] <- pamr.train(list(x = as.matrix(t(data[train.ind,])), 
@@ -28,7 +29,7 @@ do.shrunken <- function(gr, data, stages.levels, confusion.mat, eval.mat)
                               data = list(x=as.matrix(t(req.dfs$vs[train.ind,])),
                                              y=stages.levels[train.ind]), 
                                 threshold = pamr.cv.comb[[i]]$threshold[thr.ind],
-                              fitcv = pamr.cv.comb[[i]], genenames = T)[,2]
+                              fitcv = pamr.cv.comb[[i]], genenames = T)
    test.pred <- pamr.predict(fit = pamr.train.comb[[i]], 
                                 newx = as.matrix(t(data[test.ind,])),
                           threshold = pamr.cv.comb[[i]]$threshold[thr.ind])
