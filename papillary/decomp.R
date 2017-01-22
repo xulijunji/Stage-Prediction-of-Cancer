@@ -165,15 +165,6 @@ find.best.k <- function(data, folds, stages.levels)
   return(list(k, cv.pred[[k]]))
 }
 
-get.genes.shrunken <- function(shrunken.genes.df.list)
-{
-  genes = list()
-  for(i in seq_along(shrunken.genes.df.list))
-  {
-    genes[[i]] = shrunken.genes.df.list[[i]][,2]
-  }
-  return(genes)
-}
 
 get.intersect.genes <- function(genes.list, indexes)
 {
@@ -226,5 +217,9 @@ get.genes.common <- function(genes.list, max.no.of.models)
    }
    return(genes.req)
 }
+
+
+
+
 
   

@@ -2,13 +2,6 @@
 genes.comb <- list()
 gr <- build.groups(length(stages.levels.comb), 5)
 
-genes.group <- pamr.listgene(first.trial$train[[5]], 
-                             data = list(x=as.matrix(t(req.dfs$vs[sort(unlist(first.trial$gr[-5])),])),
-                                         y=stages.levels.comb[sort(unlist(first.trial$gr[-5]))]), 
-                             threshold = first.trial$cv[[5]]$threshold[21],
-                             fitcv = first.trial$cv[[5]], genenames = T)
-genes.2 <- genes.group[,2][as.numeric(genes.group[,4]) > 0]
-genes.1 <- genes.group[,2][as.numeric(genes.group[,3]) > 0]
 
 library(RColorBrewer)
 display.brewer.all()

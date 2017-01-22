@@ -66,9 +66,4 @@ if(!is.null(fitcv)){
 }
 
 
-get.shrunken.stage.wise.genes <- function(shrunken.gene.df, stage.ind, threshold.ind, threshold)
-{
-  genes <- shrunken.gene.df[,2][which(as.numeric(shrunken.gene.df[,stage.ind]) > 0 &
-                                        as.numeric(shrunken.gene.df[, threshold.ind]) > threshold)]
-  return(genes)
-}
+

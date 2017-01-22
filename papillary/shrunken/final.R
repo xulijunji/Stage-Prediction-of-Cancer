@@ -17,7 +17,7 @@ do.shrunken <- function(gr, data, stages.levels, confusion.mat, eval.mat)
                                             y = stages.levels[train.ind]))
     pamr.cv.comb[[i]] <- pamr.cv(pamr.train.comb[[i]], 
             data = list(x = t(as.matrix(data[train.ind,])),
-                    y = stages.levels.comb[train.ind]),nfold = 10)
+                    y = stages.levels[train.ind]),nfold = 10)
     
    pamr.aucs.comb[[i]] <- sapply(seq_along(pamr.cv.comb[[i]]$threshold), function(x)
    {
@@ -26,7 +26,7 @@ do.shrunken <- function(gr, data, stages.levels, confusion.mat, eval.mat)
    thr.ind = which.max(pamr.aucs.comb[[i]])
    
    pamr.genes.comb[[i]] <- pamr.listgene(pamr.train.comb[[i]], 
-                              data = list(x=as.matrix(t(req.dfs$vs[train.ind,])),
+                              data = list(x=as.matrix(t(data[train.ind,])),
                                              y=stages.levels[train.ind]), 
                                 threshold = pamr.cv.comb[[i]]$threshold[thr.ind],
                               fitcv = pamr.cv.comb[[i]], genenames = T)
@@ -139,4 +139,23 @@ do.naive <- function(gr, data, genes, stages.levels, confusion.mat, eval.mat)
     eval.mat <- out.list[[2]]
   }
   return(list(confusion.mat, eval.mat))
+}
+
+##Get the genes which crosses a certain threshold for a shrunken centroid
+get.shrunken.stage.wise.genes <- function(shrunken.gene.df, stage.ind, threshold.ind, threshold)
+{
+  genes <- shrunken.gene.df[,2][which(as.numeric(shrunken.gene.df[,stage.ind]) > 0 &
+                                        as.numeric(shrunken.gene.df[, threshold.ind]) > threshold)]
+  return(genes)
+}
+
+##Given a list of pamr.list.gene df extract from the genes
+get.genes.shrunken <- function(shrunken.genes.df.list)
+{
+  genes = list()
+  for(i in seq_along(shrunken.genes.df.list))
+  {
+    genes[[i]] = shrunken.genes.df.list[[i]][,2]
+  }
+  return(genes)
 }
