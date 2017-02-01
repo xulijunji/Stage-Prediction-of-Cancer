@@ -237,9 +237,9 @@ varSelRF <- function(xdata, Class,
     vars <- vars[1:j]
     OOB.rf<- OOB.rf[1:j]
     OOB.sd <- OOB.sd[1:j]
-    min.oob.ci <- min(OOB.rf) + c.sd * OOB.sd[which.min(OOB.rf)]
+    min.oob.ci <- min(OOB.rf) #+ c.sd * OOB.sd[which.min(OOB.rf)]
     best.pos <-
-      which(OOB.rf <= min.oob.ci)[which.min(n.vars[which(OOB.rf <= min.oob.ci)])]
+      which(OOB.rf == min.oob.ci)[which.min(n.vars[which(OOB.rf == min.oob.ci)])]
     
     selected.vars <- sort(unlist(strsplit(vars[best.pos],
                                           " + ", fixed = TRUE)))

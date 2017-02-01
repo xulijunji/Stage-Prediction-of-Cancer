@@ -3,7 +3,7 @@ library(pROC)
 library(caret)
 library(randomForest)
 library(e1071)
-
+#source('across_tumors.R')
 
 
 do.shrunken <- function(gr, data, stages.levels, confusion.mat, eval.mat)
@@ -45,7 +45,42 @@ do.shrunken <- function(gr, data, stages.levels, confusion.mat, eval.mat)
   return(list(confusion.mat, eval.mat, pamr.genes.comb))
 }
 
+do.varselRF <- function(gr, data, stages)
+{
+  model.vars <- list()
+  model.selec_his <- list()
+  for(i in seq_along(gr))
+  {
+    train.indexes = sort(unlist(gr[-i]))
+    var.ob <- varSelRF(xdata = data[train.indexes,], 
+                       Class = stages[train.indexes])
+    model.vars[[i]] = var.ob
+    #model.selec_his[[i]] = var.ob$selec.history
+  }
+  return(model.vars)
+}
 
+create.Deseq2 <- function(gr, counts_data, colData)
+{
+  deseq_list <- lapply(seq(length(gr)), function(x)
+    {
+    train.ind  <- sort(unlist(gr[-x]))
+    dds_obj <- DESeqDataSetFromMatrix(counts_data[,train.ind],
+                            colData = colData[train.ind,], design = ~stage)
+    dds_obj <- dds_obj[rowSums(assay(dds_obj)) > 2]
+    dds_obj <- DESeq(dds_obj)
+  })
+  return(deseq_list)
+}
+do.Deseq2 <- function(gr, counts_data, colData, stages.levels.comb)
+{
+  deseq.res <- lapply(gr, function(ind)
+    {
+      train.ind <- sort(setdiff(unlist(gr), ind))
+      comp.res(dds[,train.ind], 'stage.type', 'stage i', 'stage iv')
+  })
+  return(deseq.res)
+}
 #######Trial########
 # g <- pamr.listgene(pamr.train.comb[[1]], 
 #                    data = list(x=as.matrix(t(req.dfs$vs[unlist(gr[-1]),])),

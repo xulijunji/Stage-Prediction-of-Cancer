@@ -1,7 +1,7 @@
 ###heatmaps and visualisation based on various features
 genes.comb <- list()
 gr <- build.groups(length(stages.levels.comb), 5)
-
+load('environment/accuracy_feature/shrunken_list_vs_normal_reported.RData')
 
 library(RColorBrewer)
 display.brewer.all()
