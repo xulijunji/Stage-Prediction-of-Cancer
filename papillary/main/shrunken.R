@@ -1,13 +1,14 @@
 source('decomp.R')
 source('shrunken/pamr.listgenes.R')
 source('after_class.R')
-source('shrunken/final.R')
+source('main/final.R')
 library(DESeq2)
 
 load('environment/req_dfs.RData')
 load('environment/stages.level.comb.RData')
 load('environment/stage.index.RData')
 load('environment/first_trial_shrunken_classifier.RData')
+load('environment/accuracy_feature/shrunken_list_vs_normal_reported.RData')
 
 ###Saving the results of the first trial into a single list
 first.trial <- list()
@@ -44,11 +45,17 @@ genes.1 <- genes.group[,2][as.numeric(genes.group[,3]) > 0]
 
 ##vst with normal
 load('environment/dds_tumor_reported_normal_stage.RData')
+load('environment/dds_nor_tum_comb.RData')
 vst_normal_reported <- t(assay(vst(dds_tumor_reported_normal_stage)))
+
+vs_normal_comb_reported <- t(assay(vst(dds_nor_tum_comb)))
+
 View(vst_normal_reported)
 View(req.dfs$vs)
 View(colData(dds_tumor_reported_normal_stage))
 View(df.stage.tumor.rep)
+
+
 tumor.ind.vs <- which(colData(dds_tumor_reported_normal_stage)[,2] == 'T')
 match.ind <- match(colData(dds_tumor_reported_normal_stage)[,1][tumor.ind.vs],
                    df.stage.tumor.rep$sample.id)
@@ -69,10 +76,11 @@ sum(droplevels(colData(dds_tumor_reported_normal_stage)[tumor.ind.vs,4]) ==
 #                  get.intersect.genes(g, c(1,2,3,4,5))))
 
 acc.list <- do.shrunken(first.trial$gr, 
-                        vst_normal_reported[tumor.ind.vs,], 
+                        vs_normal_comb_reported[tumor.ind.vs,], 
                         stages.levels.comb, list(), list())
 features.trials.list <- get.genes.shrunken(acc.list[[3]])
 sapply(features.trials.list, length)
+length(intersect(g2, features.trials.list[[2]]))
 
 features.normal.rep <- list()
 features.normal.rep[[1]] <- get.genes.common(features.trials.list, 1)

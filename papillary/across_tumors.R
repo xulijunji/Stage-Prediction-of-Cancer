@@ -35,7 +35,7 @@ get.genes.cont <- function(stage.comp, logfc, adj.pval = NULL, pval = NULL)
 }
 get.genes <- function(res, logfc, adj.pval, pval)
 {
-  return(rownames(res)[abs(res$log2FoldChange) > logfc & res$padj < adj.pval & res$pvalue < pval])
+  return(rownames(res)[abs(res[,2]) > logfc & res[,6] < adj.pval & res[,5] < pval])
 }
 
 get.unique.genes <- function(genes.list)

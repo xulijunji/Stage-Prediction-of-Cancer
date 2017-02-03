@@ -72,12 +72,11 @@ create.Deseq2 <- function(gr, counts_data, colData)
   })
   return(deseq_list)
 }
-do.Deseq2 <- function(gr, counts_data, colData, stages.levels.comb)
+do.Deseq2 <- function(dds_list)
 {
-  deseq.res <- lapply(gr, function(ind)
+  deseq.res <- lapply(dds_list, function(dds)
     {
-      train.ind <- sort(setdiff(unlist(gr), ind))
-      comp.res(dds[,train.ind], 'stage.type', 'stage i', 'stage iv')
+      comp.res(dds, 'stage', 'stage i', 'stage iv')[['stage iv']]
   })
   return(deseq.res)
 }
@@ -193,4 +192,44 @@ get.genes.shrunken <- function(shrunken.genes.df.list)
     genes[[i]] = shrunken.genes.df.list[[i]][,2]
   }
   return(genes)
+}
+
+##Gives the genes from list of varSelRf object
+get.varSelRf.genes <- function(var.ob.list, type = 1, indexes = NULL)
+{
+  ##type = 1 for minimum OOB error
+  ##type = 2 for indexes of OOB in selec history
+  
+  if(type == 1)
+  {
+    genes.list <- sapply(var.ob.list, function(x)
+    {
+      x[[3]]
+    })
+    return(genes.list)
+  }
+  else
+  {
+    genes.list <- mapply(function(x,y)
+    {
+      x[[y]]
+    }, var.ob.list, indexes)
+    return(genes.list)
+  }
+}
+
+###Get the minimum error genes varSelRf
+get.min.oob.varselRf <- function(varselRf.ob.list)
+{
+  sel.genes.list <- sapply(varselRf.ob.list, function(obj)
+    {
+    obj = obj$selec.history
+    min.oob.error <- min(obj[,3])
+    best.pos <-
+      which(obj[,3] == min.oob.error)[which.min(obj[,1][which(obj[,3] == min.oob.error)])]
+    genes <- obj[best.pos, 2]
+    genes <- as.character(genes)
+    genes <- strsplit(genes, split = ' + ', fixed = T)
+  })
+  return(sel.genes.list)
 }

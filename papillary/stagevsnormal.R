@@ -116,8 +116,12 @@ dds_tumor_reported_normal <- DESeqDataSetFromMatrix(countData = exp_prof[,indexe
                                                     colData = sample.info.all.rep, design = ~type)
 dds_tumor_reported_normal <- DESeq(dds_tumor_reported_normal)
 
+
+dds_tumor_reported_normal_stage <- DESeqDataSetFromMatrix(countData = exp_prof[,indexes.all.rep],
+                                          colData = sample.info.all.rep, design = ~stage.type)
 dds_tumor_reported_normal_stage <- dds_tumor_reported_normal_stage[rowSums(assay(dds_tumor_reported_normal_stage)) > 2, ]
-ddds_tumor_reported_normal_stage <- DESeq(dds_tumor_reported_normal_stage)
+dds_tumor_reported_normal_stage <- DESeq(dds_tumor_reported_normal_stage)
+save(dds_tumor_reported_normal_stage, file = 'environment/dds_tumor_reported_normal_stage.RData')
 
 results.tum.reported.normal <- results(dds_tumor_reported_normal)
 diff.genes.tum.rep <- list()
@@ -126,10 +130,6 @@ diff.genes.tum.rep[[1]] <- na.omit(get.genes(results.tum.reported.normal, 1, 0.0
 diff.genes.tum.rep[[3]] <- na.omit(get.genes(results.tum.reported.normal, 3, 0.05, 1))
 diff.genes.tum.rep[[4]] <- na.omit(get.genes(results.tum.reported.normal, 4, 0.05, 1))
 diff.genes.tum.rep[[5]] <- na.omit(get.genes(results.tum.reported.normal, 5, 0.05, 1))
-
-
-dds_tumor_reported_normal_stage <- DESeqDataSetFromMatrix(countData = exp_prof[,indexes.all.rep],
-                                                    colData = sample.info.all.rep, design = ~stage.type)
 
 dds_tumor_reported_normal_stage <- DESeq(dds_tumor_reported_normal_stage)
 results.stage.reported.normal <- list()
