@@ -37,11 +37,91 @@ sample.df[,3] <- sapply(as.character(sample.df[,3]), function(stage)
 gr = first.trial$gr
 dds_obj <- create.Deseq2(gr, counts(dds_tumor_reported), 
                          colData = sample.df)
-res.train <- do.Deseq2(dds_obj)
-deseq.genes.list <- sapply(res.train, function(x)
+res.train.dds_obj <- do.Deseq2(dds_obj)
+
+deseq.genes.list <- lapply(c(1,1.5,2), function(fold)
   {
-  get.genes(x, 1.5, 0.01, 0.01)
+  lapply(res.train.dds_obj, function(x)
+  {
+    get.genes(x, fold, 0.05, 0.05)
+  })
 })
-sapply(deseq.genes.list, length)
-deseq.genes.common <- get.intersect.genes(deseq.genes.list, seq(5))
-length(intersect(deseq.genes.common, g2))
+names(deseq.genes.list) <- c("1fold", "1.5fold", "2fold")
+
+
+net.features[['deseq']] <- list()
+net.features$deseq[['genes.object']] <- res.train.dds_obj
+net.features$deseq[['genes.list']] <- deseq.genes.list
+net.features$deseq[['atleast_1']] <- get.genes.common(deseq.genes.list$`1.5fold`, 1)
+net.features$deseq[['atleast_3']] <- get.genes.common(deseq.genes.list$`1.5fold`, 3)
+net.features$deseq[['atleast_5']] <- get.genes.common(deseq.genes.list$`1.5fold`, 5)
+
+
+length(intersect(net.features$deseq$atleast_1, g2))
+sapply(net.features$deseq$genes.list$`1.5fold`, length)
+
+classifier.list[['deseq']] <- list()
+classifier.list$deseq[['atleast_1']] <- do.rf(first.trial$gr, 
+                                              vs_normal_comb_reported[tumor.ind.vs,], 
+                                              net.features$deseq$atleast_1,
+                                              stages.levels.comb, list(), 
+                                              list())
+classifier.list$deseq[['atleast_1']] <- do.knn(first.trial$gr, 
+                                                  vs_normal_comb_reported[tumor.ind.vs,], 
+                                                  net.features$deseq$atleast_1,
+                                                  stages.levels.comb, classifier.list$deseq$atleast_1[[1]], 
+                                                  classifier.list$deseq$atleast_1[[2]])
+classifier.list$deseq[['atleast_1']] <- do.svm(first.trial$gr, 
+                                               vs_normal_comb_reported[tumor.ind.vs,], 
+                                               net.features$deseq$atleast_1,
+                                               stages.levels.comb, classifier.list$deseq$atleast_1[[1]], 
+                                               classifier.list$deseq$atleast_1[[2]])
+classifier.list$deseq[['atleast_1']] <- do.naive(first.trial$gr, 
+                                               vs_normal_comb_reported[tumor.ind.vs,], 
+                                               net.features$deseq$atleast_1,
+                                               stages.levels.comb, classifier.list$deseq$atleast_1[[1]], 
+                                               classifier.list$deseq$atleast_1[[2]])
+
+classifier.list$deseq[['atleast_3']] <- do.rf(first.trial$gr, 
+                                              vs_normal_comb_reported[tumor.ind.vs,], 
+                                              net.features$deseq$atleast_3,
+                                              stages.levels.comb, list(), 
+                                              list())
+classifier.list$deseq[['atleast_3']] <- do.naive(first.trial$gr, 
+                                                 vs_normal_comb_reported[tumor.ind.vs,], 
+                                                 net.features$deseq$atleast_3,
+                                                 stages.levels.comb, classifier.list$deseq$atleast_3[[1]], 
+                                                 classifier.list$deseq$atleast_3[[2]])
+classifier.list$deseq[['atleast_3']] <- do.knn(first.trial$gr, 
+                                                 vs_normal_comb_reported[tumor.ind.vs,], 
+                                                 net.features$deseq$atleast_3,
+                                                 stages.levels.comb, classifier.list$deseq$atleast_3[[1]], 
+                                                 classifier.list$deseq$atleast_3[[2]])
+classifier.list$deseq[['atleast_3']] <- do.svm(first.trial$gr, 
+                                                 vs_normal_comb_reported[tumor.ind.vs,], 
+                                                 net.features$deseq$atleast_3,
+                                                 stages.levels.comb, classifier.list$deseq$atleast_3[[1]], 
+                                                 classifier.list$deseq$atleast_3[[2]])
+
+classifier.list$deseq[['atleast_5']] <- do.rf(first.trial$gr, 
+                                              vs_normal_comb_reported[tumor.ind.vs,], 
+                                              net.features$deseq$atleast_5,
+                                              stages.levels.comb, list(), 
+                                              list())
+classifier.list$deseq[['atleast_5']] <- do.svm(first.trial$gr, 
+                                               vs_normal_comb_reported[tumor.ind.vs,], 
+                                               net.features$deseq$atleast_5,
+                                               stages.levels.comb, classifier.list$deseq$atleast_5[[1]], 
+                                               classifier.list$deseq$atleast_5[[2]])
+classifier.list$deseq[['atleast_5']] <- do.knn(first.trial$gr, 
+                                               vs_normal_comb_reported[tumor.ind.vs,], 
+                                               net.features$deseq$atleast_5,
+                                               stages.levels.comb, classifier.list$deseq$atleast_5[[1]], 
+                                               classifier.list$deseq$atleast_5[[2]])
+classifier.list$deseq[['atleast_5']] <- do.naive(first.trial$gr, 
+                                               vs_normal_comb_reported[tumor.ind.vs,], 
+                                               net.features$deseq$atleast_5,
+                                               stages.levels.comb, classifier.list$deseq$atleast_5[[1]], 
+                                               classifier.list$deseq$atleast_5[[2]])
+save(net.features, file = 'environment/accuracy_feature/net_features.RData')
+save(classifier.list, file = 'environment/accuracy_feature/classifer_list.RData')

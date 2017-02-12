@@ -175,6 +175,30 @@ do.naive <- function(gr, data, genes, stages.levels, confusion.mat, eval.mat)
   return(list(confusion.mat, eval.mat))
 }
 
+###Fast Filter
+do.fast.filter <- function(gr, data, stages)
+{
+  features.ff <- lapply(gr, function(x)
+    {
+    train.indexes <- sort(setdiff(unlist(gr), x))
+    req.data <- cbind(data[train.indexes,], stages[train.indexes])
+    select.fast.filter(req.data,disc.method = 'MDL', threshold = 0.05)
+  })
+  return(features.ff)
+}
+
+###
+do.forward.corr <- function(gr, data, stages)
+{
+  features.for.corr <- lapply(gr, function(x)
+    {
+    train.indexes <- sort(setdiff(unlist(gr), x))
+    req.data <- cbind(data[train.indexes,], stages[train.indexes])
+    select.forward.Corr(req.data, disc.method = 'MDL')
+  })
+  return(features.for.corr)
+}
+
 ##Get the genes which crosses a certain threshold for a shrunken centroid
 get.shrunken.stage.wise.genes <- function(shrunken.gene.df, stage.ind, threshold.ind, threshold)
 {
@@ -232,4 +256,50 @@ get.min.oob.varselRf <- function(varselRf.ob.list)
     genes <- strsplit(genes, split = ' + ', fixed = T)
   })
   return(sel.genes.list)
+}
+
+get.shrunken.group.stage <- function(shrunken.gene.object.list)
+{
+  genes.1.list <- list()
+  genes.2.list <- list()
+  for(i in seq_along(shrunken.gene.object.list))
+  {
+    a <- sapply(c(3,4), function(x)
+    {
+      get.shrunken.stage.wise.genes(shrunken.gene.object.list[[i]], x, 6, 0)
+    }
+    )
+    genes.1.list[[i]] <- a[[1]]
+    genes.2.list[[i]] <- a[[2]]
+  }
+  for(i in seq_along(genes.1.list))
+  {
+    for(j in seq_along(genes.2.list))
+    {
+      if(length(intersect(genes.1.list[[i]], genes.2.list[[j]])) != 0)
+        return(-1)
+    }
+  }
+  return(list(genes.1.list, genes.2.list))
+}
+
+get.shrunken.common.stage <- function(shrunken.stage.object.list)
+{
+  genes.list.1 <- sapply(c(1,3,5), function(x)
+    {
+    get.genes.common(shrunken.stage.object.list[[1]],x)}
+    )
+  genes.list.2 <- sapply(c(1,3,5), function(x)
+  {
+    get.genes.common(shrunken.stage.object.list[[2]],x)}
+  )
+  dfs.list <- list()
+  for(i in seq_along(genes.list.1))
+  {
+    d1 <- data.frame(genes = c(genes.list.1[[i]]), stage = rep('1', length(genes.list.1[[i]])))
+    d2 <- data.frame(genes = c(genes.list.2[[i]]), stage = rep('2', length(genes.list.2[[i]])))
+    dfs.list[[i]] <- rbind(d1,d2)
+  }
+  names(dfs.list) = c('atleast_1', 'atleast_3', 'atleast_5')
+  return(dfs.list)
 }

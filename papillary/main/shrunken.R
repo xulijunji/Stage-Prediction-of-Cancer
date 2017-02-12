@@ -56,8 +56,8 @@ View(colData(dds_tumor_reported_normal_stage))
 View(df.stage.tumor.rep)
 
 
-tumor.ind.vs <- which(colData(dds_tumor_reported_normal_stage)[,2] == 'T')
-match.ind <- match(colData(dds_tumor_reported_normal_stage)[,1][tumor.ind.vs],
+tumor.ind.vs <- which(colData(dds_nor_tum_comb)[,2] == 'T')
+match.ind <- match(colData(dds_nor_tum_comb)[,1][tumor.ind.vs],
                    df.stage.tumor.rep$sample.id)
 
 sum(droplevels(colData(dds_tumor_reported_normal_stage)[tumor.ind.vs,4]) ==
@@ -80,82 +80,98 @@ acc.list <- do.shrunken(first.trial$gr,
                         stages.levels.comb, list(), list())
 features.trials.list <- get.genes.shrunken(acc.list[[3]])
 sapply(features.trials.list, length)
-length(intersect(g2, features.trials.list[[2]]))
+length(intersect(g2, features.trials.list[[5]]))
 
 features.normal.rep <- list()
 features.normal.rep[[1]] <- get.genes.common(features.trials.list, 1)
 features.normal.rep[[3]] <- get.genes.common(features.trials.list, 3)
 features.normal.rep[[5]] <- get.genes.common(features.trials.list, 5)
 
-accuracy.list <- list()
-accuracy.list[['all']] <- acc.list
-accuracy.list[['at_3']] <- acc.list
-accuracy.list[['at_1']] <- acc.list
-remove(acc.list)
+net.features <- list()
+net.features[['shrunken']] <- list()
+net.features$shrunken[['genes.object']] <- acc.list[[3]]
+net.features$shrunken[['genes.list']] <- features.trials.list
+net.features$shrunken[['atleast_1']] <- get.genes.common(features.trials.list, 1)
+net.features$shrunken[['atleast_3']] <- get.genes.common(features.trials.list, 3)
+net.features$shrunken[['atleast_5']] <- get.genes.common(features.trials.list, 5)
 
-out.list <- do.knn(gr, req.dfs$vs, genes, stages.levels.comb, out.list[[1]], out.list[[2]])
-accuracy.list[['all']] <- do.knn(first.trial$gr, 
-                      vst_normal_reported[tumor.ind.vs,], 
-                      features.normal.rep[[5]],
-                      stages.levels.comb, accuracy.list$all[[1]], 
-                      accuracy.list$all[[2]])
-accuracy.list[['all']] <- do.rf(first.trial$gr, 
-                                 vst_normal_reported[tumor.ind.vs,], 
-                                 features.normal.rep[[5]],
-                             stages.levels.comb, accuracy.list$all[[1]], 
-                                 accuracy.list$all[[2]])
-accuracy.list[['all']] <- do.naive(first.trial$gr, 
-                                 vst_normal_reported[tumor.ind.vs,], 
-                                 features.normal.rep[[5]],
-                                 stages.levels.comb, accuracy.list$all[[1]], 
-                                 accuracy.list$all[[2]])
-accuracy.list[['all']] <- do.svm(first.trial$gr, 
-                                 vst_normal_reported[tumor.ind.vs,], 
-                                 features.normal.rep[[5]],
-                                 stages.levels.comb, accuracy.list$all[[1]], 
-                                 accuracy.list$all[[2]])
+classifier.list <- list()
+classifier.list[['shrunken']] <- list()
+classifier.list[['shrunken']][['atleast_1']] <- acc.list[c(1,2)]
+classifier.list[['shrunken']][['atleast_3']] <- acc.list[c(1,2)]
+classifier.list[['shrunken']][['atleast_5']] <- acc.list[c(1,2)]
+
+#out.list <- do.knn(gr, req.dfs$vs, genes, stages.levels.comb, out.list[[1]], out.list[[2]])
+classifier.list$shrunken[['atleast_1']] <- do.knn(first.trial$gr, 
+                      vs_normal_comb_reported[tumor.ind.vs,], 
+                      net.features$shrunken$atleast_1,
+                      stages.levels.comb, classifier.list$shrunken$atleast_1[[1]], 
+                      classifier.list$shrunken$atleast_1[[2]])
+classifier.list$shrunken[['atleast_1']] <- do.rf(first.trial$gr, 
+                                         vs_normal_comb_reported[tumor.ind.vs,], 
+                                         net.features$shrunken$atleast_1,
+                                         stages.levels.comb, classifier.list$shrunken$atleast_1[[1]], 
+                                         classifier.list$shrunken$atleast_1[[2]])
+classifier.list$shrunken[['atleast_1']] <- do.naive(first.trial$gr, 
+                                        vs_normal_comb_reported[tumor.ind.vs,], 
+                                        net.features$shrunken$atleast_1,
+                                        stages.levels.comb, classifier.list$shrunken$atleast_1[[1]], 
+                                        classifier.list$shrunken$atleast_1[[2]])
+classifier.list$shrunken[['atleast_1']] <- do.svm(first.trial$gr, 
+                                        vs_normal_comb_reported[tumor.ind.vs,], 
+                                        net.features$shrunken$atleast_1,
+                                        stages.levels.comb, classifier.list$shrunken$atleast_1[[1]], 
+                                        classifier.list$shrunken$atleast_1[[2]])
 
 
-accuracy.list[['at_3']] <-do.knn(first.trial$gr, 
-                          vst_normal_reported[tumor.ind.vs,], 
-                          features.normal.rep[[3]],
-                          stages.levels.comb, accuracy.list$at_3[[1]], 
-                          accuracy.list$at_3[[2]])
-accuracy.list[['at_3']] <-do.rf(first.trial$gr, 
-                                 vst_normal_reported[tumor.ind.vs,], 
-                                 features.normal.rep[[3]],
-                                 stages.levels.comb, accuracy.list$at_3[[1]], 
-                                 accuracy.list$at_3[[2]])
-accuracy.list[['at_3']] <-do.naive(first.trial$gr, 
-                                 vst_normal_reported[tumor.ind.vs,], 
-                                 features.normal.rep[[3]],
-                                 stages.levels.comb, accuracy.list$at_3[[1]], 
-                                 accuracy.list$at_3[[2]])
-accuracy.list[['at_3']] <-do.svm(first.trial$gr, 
-                                 vst_normal_reported[tumor.ind.vs,], 
-                                 features.normal.rep[[3]],
-                                 stages.levels.comb, accuracy.list$at_3[[1]], 
-                                 accuracy.list$at_3[[2]])
+classifier.list$shrunken[['atleast_3']] <- do.knn(first.trial$gr, 
+                          vs_normal_comb_reported[tumor.ind.vs,], 
+                          net.features$shrunken$atleast_3,
+                          stages.levels.comb, classifier.list$shrunken$atleast_3[[1]], 
+                          classifier.list$shrunken$atleast_3[[2]])
+classifier.list$shrunken$atleast_3 <- do.rf(first.trial$gr, 
+                                             vs_normal_comb_reported[tumor.ind.vs,], 
+                                             net.features$shrunken$atleast_3,
+                                             stages.levels.comb, classifier.list$shrunken$atleast_3[[1]], 
+                                             classifier.list$shrunken$atleast_3[[2]])
+classifier.list$shrunken$atleast_3 <- do.naive(first.trial$gr, 
+                                            vs_normal_comb_reported[tumor.ind.vs,], 
+                                            net.features$shrunken$atleast_3,
+                                            stages.levels.comb, classifier.list$shrunken$atleast_3[[1]], 
+                                            classifier.list$shrunken$atleast_3[[2]])
+classifier.list$shrunken$atleast_3 <- do.svm(first.trial$gr, 
+                                               vs_normal_comb_reported[tumor.ind.vs,], 
+                                               net.features$shrunken$atleast_3,
+                                               stages.levels.comb, classifier.list$shrunken$atleast_3[[1]], 
+                                               classifier.list$shrunken$atleast_3[[2]])
 
-accuracy.list[['at_1']] <-do.knn(first.trial$gr, 
-                                 vst_normal_reported[tumor.ind.vs,], 
-                                 features.normal.rep[[1]],
-                                 stages.levels.comb, accuracy.list$at_1[[1]], 
-                                 accuracy.list$at_1[[2]])
-accuracy.list[['at_1']] <-do.rf(first.trial$gr, 
-                                 vst_normal_reported[tumor.ind.vs,], 
-                                 features.normal.rep[[1]],
-                           stages.levels.comb, accuracy.list$at_1[[1]], 
-                                 accuracy.list$at_1[[2]])
-accuracy.list[['at_1']] <-do.naive(first.trial$gr, 
-                                 vst_normal_reported[tumor.ind.vs,], 
-                                 features.normal.rep[[1]],
-                                 stages.levels.comb, accuracy.list$at_1[[1]], 
-                                 accuracy.list$at_1[[2]])
-accuracy.list[['at_1']] <-do.svm(first.trial$gr, 
-                                 vst_normal_reported[tumor.ind.vs,], 
-                                 features.normal.rep[[1]],
-                                 stages.levels.comb, accuracy.list$at_1[[1]], 
-                                 accuracy.list$at_1[[2]])
-save(accuracy.list, file = 'environment/accuracy_list_vs_normal_reported.RData')
-load('environment/accuracy_feature/shrunken_list_vs_normal_reported.RData')
+classifier.list$shrunken$atleast_5 <- do.knn(first.trial$gr, 
+                                               vs_normal_comb_reported[tumor.ind.vs,], 
+                                               net.features$shrunken$atleast_5,
+                                               stages.levels.comb, classifier.list$shrunken$atleast_5[[1]], 
+                                               classifier.list$shrunken$atleast_5[[2]])
+classifier.list$shrunken$atleast_5 <- do.naive(first.trial$gr, 
+                                               vs_normal_comb_reported[tumor.ind.vs,], 
+                                               net.features$shrunken$atleast_5,
+                                               stages.levels.comb, classifier.list$shrunken$atleast_5[[1]], 
+                                               classifier.list$shrunken$atleast_5[[2]])
+classifier.list$shrunken$atleast_5 <- do.rf(first.trial$gr, 
+                                               vs_normal_comb_reported[tumor.ind.vs,], 
+                                               net.features$shrunken$atleast_5,
+                                               stages.levels.comb, classifier.list$shrunken$atleast_5[[1]], 
+                                               classifier.list$shrunken$atleast_5[[2]])
+classifier.list$shrunken$atleast_5 <- do.svm(first.trial$gr, 
+                                               vs_normal_comb_reported[tumor.ind.vs,], 
+                                               net.features$shrunken$atleast_5,
+                                               stages.levels.comb, classifier.list$shrunken$atleast_5[[1]], 
+                                               classifier.list$shrunken$atleast_5[[2]])
+
+net.features$shrunken$genes_stage <- get.shrunken.group.stage(net.features$shrunken$genes.object)
+net.features$shrunken$atleast_dfs <- get.shrunken.common.stage(net.features$shrunken$genes_stage)
+length(intersect(net.features$shrunken$atleast_5, net.features$shrunken$atleast_dfs$atleast_5$genes)) ==
+  length(net.features$shrunken$atleast_5)
+
+save(net.features, file = 'environment/accuracy_feature/net_features.RData')
+save(classifier.list, file = 'environment/accuracy_feature/classifer_list.RData')
+
+###Further characterisation of the genes
