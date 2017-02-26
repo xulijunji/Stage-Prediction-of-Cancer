@@ -22,11 +22,11 @@ features.varSelRF1 <- do.varselRF(gr, vs_normal_comb_reported[tumor.ind.vs,],
 save(features.varSelRF1, file = 'environment/features_varSelRF1_comb.RData')
 
 genes.varSelRf.list <- get.varSelRf.genes(features.varSelRF)
-genes.varSelRf.list1 <- get.min.oob.varselRf(features.varSelRF1)
+genes.varSelRf.list1 <- get.min.oob.varselRf(net.features$varSelRf$genes.object)
 
 net.features[['varSelRf']] <- list()
 net.features$varSelRf[['genes.object']] <- features.varSelRF1
-net.features$varSelRf[['genes.list']] <- genes.varSelRf.list1
+net.features$varSelRf[['genes.list']] <- get.min.oob.varselRf(net.features$varSelRf$genes.object)
 
 sapply(genes.varSelRf.list1, length)
 length(intersect(genes.varSelRf.list1[[2]], genes.varSelRf.list1[[1]]))

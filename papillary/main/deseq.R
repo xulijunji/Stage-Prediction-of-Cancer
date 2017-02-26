@@ -4,6 +4,8 @@ load('environment/dds_tumor_reported_normal_stage.RData')
 load('environment/dds_tumor_reported.RData')
 load('environment/first_trial_shrunken_classifier.RData')
 load('environment/dds_object.RData')
+load('environment/accuracy_feature/classifer_list.RData')
+load('environment/accuracy_feature/net_features.RData')
 source('across_tumors.R')
 source('main/final.R')
 
@@ -52,10 +54,18 @@ names(deseq.genes.list) <- c("1fold", "1.5fold", "2fold")
 net.features[['deseq']] <- list()
 net.features$deseq[['genes.object']] <- res.train.dds_obj
 net.features$deseq[['genes.list']] <- deseq.genes.list
-net.features$deseq[['atleast_1']] <- get.genes.common(deseq.genes.list$`1.5fold`, 1)
-net.features$deseq[['atleast_3']] <- get.genes.common(deseq.genes.list$`1.5fold`, 3)
-net.features$deseq[['atleast_5']] <- get.genes.common(deseq.genes.list$`1.5fold`, 5)
-
+net.features$deseq[['atleast_1']] <- sapply(net.features$deseq$genes.list, function(x)
+  {
+  get.genes.common(x, 1)
+})
+net.features$deseq[['atleast_3']] <- sapply(net.features$deseq$genes.list, function(x)
+{
+  get.genes.common(x, 3)
+})
+net.features$deseq[['atleast_5']] <- sapply(net.features$deseq$genes.list, function(x)
+{
+  get.genes.common(x, 5)
+})
 
 length(intersect(net.features$deseq$atleast_1, g2))
 sapply(net.features$deseq$genes.list$`1.5fold`, length)

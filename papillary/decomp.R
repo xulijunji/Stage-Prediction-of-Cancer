@@ -1,6 +1,6 @@
-library(pamr)
-library(pROC)
-library(caret)
+#library(pamr)
+#library(pROC)
+#library(caret)
 
 build.groups <- function(total.samples, num.group)
 {
@@ -171,7 +171,8 @@ get.intersect.genes <- function(genes.list, indexes)
   return(Reduce(intersect, genes.list[indexes]))
 }
 
-create.heatmap <- function(data, stages, genes, col = NULL, labs = NULL)
+create.heatmap <- function(data, stages, genes, col = NULL, labs = NULL,
+                           title)
 {
   library(pheatmap)
   stage.ind.levels <- list()
@@ -194,7 +195,7 @@ create.heatmap <- function(data, stages, genes, col = NULL, labs = NULL)
            show_colnames = F,
            cluster_cols = F, 
            annotation_col = annotation_col,
-           color = col)
+           color = col, main = title, fontsize = 20)
 }
   
 get.genes.common <- function(genes.list, max.no.of.models)
@@ -218,8 +219,14 @@ get.genes.common <- function(genes.list, max.no.of.models)
    return(genes.req)
 }
 
-
-
+get.mean <- function(class.list, ind, mode)
+{
+  req.values <- sapply(class.list, function(x)
+    {
+    x[[mode]][ind]
+  })
+  return(mean(req.values))
+}
 
 
   
