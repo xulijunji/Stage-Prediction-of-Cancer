@@ -26,6 +26,7 @@ build.groups <- function(total.samples, num.group)
       gr[[vrem[i]]]=c(gr[[vrem[i]]],range[i])
     }
   }
+  gr <- lapply(gr, sort)
   return(gr)
 }
 

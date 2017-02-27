@@ -258,6 +258,7 @@ get.min.oob.varselRf <- function(varselRf.ob.list)
   return(sel.genes.list)
 }
 
+###Shrunken has 2 stages and for each group finds the gene corresponding to each stage
 get.shrunken.group.stage <- function(shrunken.gene.object.list)
 {
   genes.1.list <- list()
@@ -283,13 +284,14 @@ get.shrunken.group.stage <- function(shrunken.gene.object.list)
   return(list(genes.1.list, genes.2.list))
 }
 
-get.shrunken.common.stage <- function(shrunken.stage.object.list)
+###Returns a df of the genes common in certain number of groups along with their stages
+get.shrunken.common.stage <- function(shrunken.stage.object.list, no.groups.list)
 {
-  genes.list.1 <- sapply(c(1,3,5), function(x)
+  genes.list.1 <- sapply(no.groups.list, function(x)
     {
     get.genes.common(shrunken.stage.object.list[[1]],x)}
     )
-  genes.list.2 <- sapply(c(1,3,5), function(x)
+  genes.list.2 <- sapply(no.groups.list, function(x)
   {
     get.genes.common(shrunken.stage.object.list[[2]],x)}
   )
@@ -300,6 +302,6 @@ get.shrunken.common.stage <- function(shrunken.stage.object.list)
     d2 <- data.frame(genes = c(genes.list.2[[i]]), stage = rep('2', length(genes.list.2[[i]])))
     dfs.list[[i]] <- rbind(d1,d2)
   }
-  names(dfs.list) = c('atleast_1', 'atleast_3', 'atleast_5')
+  names(dfs.list) = paste(rep(c('atleast_'), length(no.groups.list)), no.groups.list)
   return(dfs.list)
 }
