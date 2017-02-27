@@ -7,7 +7,8 @@ load('environment/stages.level.comb.RData')
 load('environment/accuracy_feature/vs_nor_comb.RData')
 load('environment/accuracy_feature/tumor_ind_vs.RData')
 load('environment/first_trial_shrunken_classifier.RData')
-load('environment/accuracy_feature/gr.RData')
+load('environment/accuracy_feature/updated/gr.RData')
+load('environment/accuracy_feature/updated/net_features_updated.RData')
 
 vst_tumor_tum <- vs_normal_comb_reported[tumor.ind.vs, ]
 
@@ -31,4 +32,6 @@ net.features.updated$shrunken[['atleast_4']] <- get.genes.common(net.features.up
 net.features.updated$shrunken[['genes_stage']] <- get.shrunken.group.stage(net.features.updated$shrunken$genes.object)
 net.features.updated$shrunken[['atleast_dfs']] <- get.shrunken.common.stage(net.features.updated$shrunken$genes_stage, c(1,2,4))
 
-#####
+######VarSelRF####
+net.features.updated[['varSelRF']] <- list()
+net.features.updated[['varSelRF']][['genes.object']] <- do.varselRF(gr.train, vst_tumor_tum, stages.levels.comb)

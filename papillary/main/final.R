@@ -1,7 +1,9 @@
 library(pamr)
 library(pROC)
 library(caret)
+library(varSelRF)
 library(randomForest)
+library(DESeq2)
 library(e1071)
 #source('across_tumors.R')
 
