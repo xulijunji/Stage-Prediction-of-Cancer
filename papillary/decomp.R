@@ -1,6 +1,8 @@
-#library(pamr)
-#library(pROC)
-#library(caret)
+library(pamr)
+library(pROC)
+library(caret)
+library(randomForest)
+library(e1071)
 
 build.groups <- function(total.samples, num.group)
 {
@@ -38,6 +40,8 @@ get.stage.distribution <- function(gr, stages)
   })
   return(stage.dist)
 }
+
+
 
 cv.rf <- function(data, folds, stages.levels,sampsize = if (replace) nrow(data) else ceiling(.632*nrow(data)))
 {
