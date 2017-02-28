@@ -5,7 +5,7 @@ library(varSelRF)
 library(randomForest)
 library(DESeq2)
 library(e1071)
-#source('across_tumors.R')
+source('across_tumors.R')
 
 
 do.shrunken <- function(gr, data, stages.levels, confusion.mat, eval.mat)
@@ -306,4 +306,18 @@ get.shrunken.common.stage <- function(shrunken.stage.object.list, no.groups.list
   }
   names(dfs.list) = paste(rep(c('atleast_'), length(no.groups.list)), no.groups.list)
   return(dfs.list)
+}
+
+###Get the deseq genes for a given fold list
+get.deseq2.genes <- function(res.list, fold_list)
+{
+  genes.list <- lapply(fold_list, function(fold)
+                {
+                  lapply(res.list, function(x)
+                  {
+                    get.genes(x, fold, 0.05, 0.05)
+                  })
+                })
+  names(genes.list) <- paste(as.character(fold_list), rep(c('fold'), length(fold_list)))
+  return(genes.list)
 }
