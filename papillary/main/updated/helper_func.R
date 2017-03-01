@@ -5,6 +5,7 @@ library(randomForest)
 library(e1071)
 library(DESeq2)
 library(caret)
+library(class)
 source('shrunken/pamr.listgenes.R')
 
 
@@ -81,44 +82,126 @@ build.svm.classifier <- function(data, train.ind, genes.list,
   return(svm.train.list)
 }
 
+build.nb.classifier <- function(data, train.ind, genes.list, stages.levels)
+{
+  nb.train.list <- lapply(seq_along(genes.list), function(i){
+    naiveBayes(data[train.ind, genes.list[[i]]], stages.levels[train.ind])
+  })
+  names(nb.train.list) <- names(genes.list)
+  return(nb.train.list)
+}
+
 ###Cross validation Models
 cv.shrunken <- function(data, folds, genes.list, train.models.list, train.ind, stages.levels)
 {
-  cv.models <- lapply(seq(length(genes.list)), function(i)
+  cv.models <- lapply(seq_along(genes.list), function(i)
   {
     pamr.cv(train.models.list[[i]], list(x = t(as.matrix(data[train.ind, genes.list[[i]]])),
                               y = stages.levels[train.ind]), folds)
   })
   names(cv.models) <- names(genes.list)
-  return(cv.models)
-}
-
-
-#####Results
-shrunken.cv.results <- function(cv.models, stages.levels, train.ind)
-{
-  thr <- sapply(cv.models, function(model)
-  {
-    pamr.aucs.comb <- sapply(seq_along(model$threshold), function(x)
-    {
-      multiclass.roc(stages.levels[train.ind], ordered(model$yhat[,x]))$auc
-    })
-    which.max(pamr.aucs.comb)
-  })
-  names(thr) <- names(cv.models)
   
-  eval <- lapply(seq_along(cv.models), function(i)
+  thr <- find.best.shrunken.threshold(cv.models, stages.levels[train.ind])
+  
+  pred <- lapply(seq_along(cv.models), function(i)
     {
-    get.eval(stages.levels[train.ind], cv.models[[i]]$yhat[,thr[i]])
+    cv.models[[i]]$yhat[,thr[i]]
   })
-  names(eval) <- names(cv.models)
+  names(pred) <- names(genes.list)
   
   res <- list()
+  res[['cv.models']] <- cv.models
   res[['thr']] <- thr
-  res[['metric']] <- eval
+  res[['pred']] <- pred
   return(res)
 }
 
+cv.svm.list <- function(data, folds, genes.list, train.ind, stages.levels,
+                        gamma = 0, kernel = 'linear', cost =1,
+                        class.weights =if(length(levels(stages.levels)) == 4) 
+                          c('stage i' = 1, 'stage ii' =1, 'stage iii' = 1, 'stage iv' =1)
+                        else c('stage i' = 1, 'stage iv' = 1))
+{
+  svm.pred <- lapply(genes.list, function(genes)
+    {
+    cv.svm(data[train.ind, genes], folds, stages.levels[train.ind])
+  })
+  names(svm.pred) <- names(genes.list)
+  return(svm.pred)
+}
+
+cv.rf.list <- function(data, folds, genes.list, train.ind, stages.levels,
+                       sampsize = if (replace) nrow(data)
+                       else ceiling(.632*nrow(data)))
+{
+  rf.pred <- lapply(genes.list, function(genes)
+    {
+    cv.rf(data[train.ind, genes], folds, stages.levels[train.ind])
+  })
+  names(rf.pred) <- names(genes.list)
+  return(rf.pred)
+}
+
+cv.nb.list <- function(data, folds, genes.list, train.ind, stages.levels)
+{
+  nb.pred <- lapply(genes.list, function(genes)
+  {
+    cv.naiveBayes(data[train.ind, genes], folds, stages.levels[train.ind])
+  })
+  names(nb.pred) <- names(genes.list)
+  return(nb.pred)
+}
+
+cv.knn.list <- function(data, folds, genes.list, train.ind, stages.levels)
+{
+  knn.pred <- lapply(genes.list, function(genes)
+  {
+    find.best.k(data[train.ind, genes], folds, stages.levels[train.ind])
+  })
+  names(knn.pred) <- names(genes.list)
+  return(knn.pred)
+}
+
+###Prediction Test
+predict.shrunken <- function(train.models, genes.list, test.data, thresholds.list)
+{
+  if(length(train.models) != length(genes.list))
+    print("havoc")
+  shrunken.pred <- lapply(seq_along(train.models), function(i)
+    {
+    pamr.predict(train.models[[i]], t(test.data[,genes.list[[i]]]), 
+                 threshold = train.models[[i]]$threshold[thresholds.list[i]])
+  })
+  names(shrunken.pred) <- names(train.models)
+  return(shrunken.pred)
+}
+
+predict.knn <- function(cv.models, genes.list, train.data, test.data, stages.train)
+{
+  if(length(cv.models) != length(genes.list))
+    print("havoc")
+  pred.knn <- lapply(seq_along(cv.models), function(i)
+  {
+    knn(train.data[,genes.list[[i]]], test.data[,genes.list[[i]]], stages.train, 
+        cv.models[[i]]$best_k)
+  })
+  names(pred.knn) <- names(cv.models)
+  return(pred.knn)
+}
+
+predict.model <- function(train.models, genes.list, test.data)
+{
+  if(length(train.models) != length(genes.list))
+    print("havoc")
+  pred <- lapply(seq_along(train.models), function(i)
+  {
+    predict(train.models[[i]], test.data[,genes.list[[i]]])
+  })
+  names(pred) <- names(train.models)
+  return(pred)
+}
+
+#####Results
 get.eval <- function(actual.stages, pred.stages)
 {
   res <- list()

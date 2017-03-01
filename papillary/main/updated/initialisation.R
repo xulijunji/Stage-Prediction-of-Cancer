@@ -1,4 +1,3 @@
-setwd('~/h_short/papillary')
 source('decomp.R')
 source('main/updated/helper_func.R')
 source('main/final.R')
@@ -8,7 +7,7 @@ load('environment/stages.level.comb.RData')
 #load('environment/accuracy_feature/dds_nor_tum_comb.RData')
 load('environment/accuracy_feature/vs_nor_comb.RData')
 load('environment/accuracy_feature/tumor_ind_vs.RData')
-load('environment/first_trial_shrunken_classifier.RData')
+#load('environment/first_trial_shrunken_classifier.RData')
 load('environment/accuracy_feature/updated/gr.RData')
 load('environment/accuracy_feature/updated/net_features_updated.RData')
 

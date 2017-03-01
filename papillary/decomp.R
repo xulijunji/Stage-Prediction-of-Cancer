@@ -68,7 +68,6 @@ cv.svm <- function(data, folds, stages.levels, gamma = 0, kernel = 'linear', cos
                                                                            'stage iii' = 1, 'stage iv' =1)
                    else c('stage i' = 1, 'stage iv' = 1))
 {
-  library(e1071)
   total.samp <- length(rownames(data))
   gr <- build.groups(total.samp, folds)
   if(length(gr) != folds)
@@ -167,9 +166,25 @@ find.best.k <- function(data, folds, stages.levels)
     multiclass.roc(stages.levels, ordered(cv.pred[[k]]))$auc
   })
   k <- which.max(aucs)
-  return(list(k, cv.pred[[k]]))
+  res <- list()
+  res[['best_k']] <- k
+  res[['pred']] <- cv.pred[[k]]
+  return(res)
 }
 
+find.best.shrunken.threshold <- function(cv.models, stages.levels)
+{
+  thr <- sapply(cv.models, function(model)
+  {
+    pamr.aucs.comb <- sapply(seq_along(model$threshold), function(x)
+    {
+      multiclass.roc(stages.levels, ordered(model$yhat[,x]))$auc
+    })
+    which.max(pamr.aucs.comb)
+  })
+  names(thr) <- names(cv.models)
+ return(thr) 
+}
 
 get.intersect.genes <- function(genes.list, indexes)
 {
