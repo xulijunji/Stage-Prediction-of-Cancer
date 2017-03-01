@@ -3,7 +3,7 @@ source('main/updated/initialisation.R')
 net.features.updated <- list()
 ######Shrunken####
 net.features.updated[['shrunken']] <- list()
-shrunken.features.ob <- get.shrunken.features(gr.train, vst_tumor_tum, stages.levels.comb)
+shrunken.features.ob <- get.shrunken.features(gr.updated.train, vst_tumor_tum, stages.levels.comb)
 net.features.updated$shrunken[['genes.object']] <- shrunken.features.ob$genes
 net.features.updated$shrunken[['genes']] <- get.genes.shrunken(net.features.updated$shrunken$genes.object)
 net.features.updated$shrunken[['atleast_1']] <- get.genes.common(net.features.updated$shrunken$genes, 1)
@@ -16,7 +16,7 @@ save(net.features.updated,file = 'environment/accuracy_feature/updated/net_featu
 
 ######VarSelRF####
 net.features.updated[['varSelRF']] <- list()
-net.features.updated[['varSelRF']][['genes.object']] <- do.varselRF(gr.train, vst_tumor_tum, stages.levels.comb)
+net.features.updated[['varSelRF']][['genes.object']] <- do.varselRF(gr.updated.train, vst_tumor_tum, stages.levels.comb)
 net.features.updated$varSelRF[['genes.list']] <- get.min.oob.varselRf(net.features.updated$varSelRF$genes.object)
 net.features.updated$varSelRF[['atleast_1']] <- get.genes.common(net.features.updated$varSelRF$genes.list,1)
 net.features.updated$varSelRF[['atleast_2']] <- get.genes.common(net.features.updated$varSelRF$genes.list,2)

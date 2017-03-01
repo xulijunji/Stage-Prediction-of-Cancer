@@ -3,6 +3,8 @@ library(pROC)
 library(caret)
 library(randomForest)
 library(e1071)
+source('across_tumors.R')
+source('after_class.R')
 
 build.groups <- function(total.samples, num.group)
 {
@@ -40,8 +42,6 @@ get.stage.distribution <- function(gr, stages)
   })
   return(stage.dist)
 }
-
-
 
 cv.rf <- function(data, folds, stages.levels,sampsize = if (replace) nrow(data) else ceiling(.632*nrow(data)))
 {
@@ -123,7 +123,6 @@ cv.naiveBayes <- function(data, folds, stages.levels)
   }
   return(predicted)
 }
-
 
 get.results <- function(actual.cv, pred.cv, actual.test, pred.test, conf.mat, eval.mat, classifier, i)
 {

@@ -202,6 +202,13 @@ predict.model <- function(train.models, genes.list, test.data)
 }
 
 #####Results
+get.eval.list <- function(actual.stages, predict.list)
+{
+  eval.list <- lapply(predict.list, function(predicted)
+    {
+    get.eval(actual.stages, predicted)
+  })
+}
 get.eval <- function(actual.stages, pred.stages)
 {
   res <- list()
