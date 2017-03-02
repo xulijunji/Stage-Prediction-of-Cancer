@@ -17,5 +17,20 @@ create.list.venn <- function(net.features, fold, group)
   names(req.list) <- c('Shrunken', 'VarSelRF', paste0('Deseq2_',fold))
   return(req.list)
 }
+#1.5 fold
+venn.diagram(create.list.venn(net.features.updated, 1.5, 1), filename = 'images/tumor/feature_updated/1_1.5fold.tiff')
+venn.diagram(create.list.venn(net.features.updated, 1.5, 2), filename = 'images/tumor/feature_updated/2_1.5fold.tiff')
+venn.diagram(create.list.venn(net.features.updated, 1.5, 3), filename = 'images/tumor/feature_updated/3_1.5fold.tiff')
+venn.diagram(create.list.venn(net.features.updated, 1.5, 4), filename = 'images/tumor/feature_updated/4_1.5fold.tiff')
 
-venn.diagram(create.list.venn(net.features.updated, 1.5, 1), filename = 'images/tumor/feature_updated/1_1.5fold')
+#1 fold
+venn.diagram(create.list.venn(net.features.updated, 1, 1), filename = 'images/tumor/feature_updated/1_1fold.tiff')
+venn.diagram(create.list.venn(net.features.updated, 1, 2), filename = 'images/tumor/feature_updated/2_1fold.tiff')
+venn.diagram(create.list.venn(net.features.updated, 1, 3), filename = 'images/tumor/feature_updated/3_1fold.tiff')
+venn.diagram(create.list.venn(net.features.updated, 1, 4), filename = 'images/tumor/feature_updated/4_1fold.tiff')
+
+#2 fold
+venn.diagram(create.list.venn(net.features.updated, 2, 1), filename = 'images/tumor/feature_updated/1_2fold.tiff')
+venn.diagram(create.list.venn(net.features.updated, 2, 2), filename = 'images/tumor/feature_updated/2_2fold.tiff')
+venn.diagram(create.list.venn(net.features.updated, 2, 3), filename = 'images/tumor/feature_updated/3_2fold.tiff')
+venn.diagram(create.list.venn(net.features.updated, 2, 4), filename = 'images/tumor/feature_updated/4_2fold.tiff')

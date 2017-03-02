@@ -111,4 +111,53 @@ test.pred$varSelRF[['knn']] <- predict.knn(cv.model$varSelRF$knn,
 #############VarSelRF features###########
 
 ##############DeSeq2 features###########
-train.model[[]]
+train.model[['deseq2_2']] <- list()
+cv.model[['deseq2_2']] <- list()
+test.pred[['deseq2_2']] <- list()
+
+##########Train###############
+deseq2_2 <- lapply(net.features.updated$deseq2[c(3,4,5,6)], function(genes.list)
+  {
+  genes.list[['2 fold']]  
+})
+train.model$deseq2_2[['shrunken']] <- build.shrunken.classifier(vst_tumor_tum, train.indexes, 
+                                                               deseq2_2, stages.levels.comb)
+train.model$deseq2_2[['svm']] <- build.svm.classifier(vst_tumor_tum, train.indexes, 
+                                                                deseq2_2, stages.levels.comb)
+train.model$deseq2_2[['nb']] <- build.nb.classifier(vst_tumor_tum, train.indexes, 
+                                                                deseq2_2, stages.levels.comb)
+train.model$deseq2_2[['rf']] <- build.rf.classifier(vst_tumor_tum, train.indexes, 
+                                                                deseq2_2, stages.levels.comb)
+##########CV###################
+cv.model$deseq2_2[['shrunken']] <- cv.shrunken(vst_tumor_tum, 10, deseq2_2,
+                                              train.model$deseq2_2$shrunken, train.indexes, 
+                                               stages.levels.comb)
+cv.model$deseq2_2[['rf']] <- cv.rf.list(vst_tumor_tum, 10, deseq2_2,
+                                        train.indexes, stages.levels.comb)
+cv.model$deseq2_2[['nb']] <- cv.nb.list(vst_tumor_tum, 10, deseq2_2,
+                                        train.indexes, stages.levels.comb)
+cv.model$deseq2_2[['svm']] <- cv.svm.list(vst_tumor_tum, 10, deseq2_2,
+                                        train.indexes, stages.levels.comb)
+cv.model$deseq2_2[['knn']] <- cv.knn.list(vst_tumor_tum, 10, deseq2_2,
+                                        train.indexes, stages.levels.comb)
+##########Test###############
+test.pred$deseq2_2[['shrunken']] <- predict.shrunken(train.model$deseq2_2$shrunken, 
+                                                     deseq2_2,
+                                                     vst_tumor_tum[test.indexes, ], 
+                                                     cv.model$deseq2_2$shrunken$thr)
+test.pred$deseq2_2[['svm']] <- predict.model(train.model$deseq2_2$svm, 
+                                                     deseq2_2,
+                                                     vst_tumor_tum[test.indexes, ])
+test.pred$deseq2_2[['rf']] <- predict.model(train.model$deseq2_2$rf, 
+                                             deseq2_2,
+                                             vst_tumor_tum[test.indexes, ])
+test.pred$deseq2_2[['nb']] <- predict.model(train.model$deseq2_2$nb, 
+                                             deseq2_2,
+                                             vst_tumor_tum[test.indexes, ])
+test.pred$deseq2_2[['knn']] <- predict.knn(cv.model$deseq2_2$knn, 
+                                    deseq2_2, vst_tumor_tum[train.indexes,],
+                                    vst_tumor_tum[test.indexes, ], stages.levels.comb[train.indexes])
+
+save(cv.model, file = 'environment/accuracy_feature/updated/cv_model.RData')
+save(test.pred, file = 'environment/accuracy_feature/updated/test_pred.RData')
+save(train.model, file = 'environment/accuracy_feature/updated/train_model.RData')

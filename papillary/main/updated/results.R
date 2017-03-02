@@ -47,8 +47,27 @@ test.results[['varSelRF']] <- list()
 test.results$varSelRF <- lapply(test.pred$varSelRF, function(pred.test){
   get.eval.list(stages.levels.comb[test.indexes], pred.test)
 })
-                                              
 ###############VarSelRF feature##############
 
 ###############DeSeq2 feature#################
-###############DeSeq2 feature
+########CV##########
+cv.results[['deseq2_2']] <- list()
+cv.results$deseq2_2[['shrunken']] <- get.eval.list(stages.levels.comb[train.indexes],
+                                                   cv.model$deseq2_2$shrunken$pred)
+knn.pred <- lapply(cv.model$deseq2_2$knn, function(model)
+{
+  model$pred
+})
+cv.results$deseq2_2[['knn']] <- get.eval.list(stages.levels.comb[train.indexes], knn.pred)
+cv.results$deseq2_2[c('svm','rf', 'nb')] <- lapply(cv.model$deseq2_2[c('svm','rf', 'nb')],
+                                                   function(pred.cv){
+                                           get.eval.list(stages.levels.comb[train.indexes], pred.cv)
+                                                   })
+#######Test#########
+test.results[['deseq2_2']] <- list()
+test.results$deseq2_2 <- lapply(test.pred$deseq2_2, function(pred.test){
+  get.eval.list(stages.levels.comb[test.indexes], pred.test)
+})
+###############DeSeq2 feature#################
+save(cv.results, file = 'environment/accuracy_feature/updated/cv_results.RData')
+save(test.results, file = 'environment/accuracy_feature/updated/test_results.RData')
