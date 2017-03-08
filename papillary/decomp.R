@@ -190,9 +190,9 @@ get.intersect.genes <- function(genes.list, indexes)
   return(Reduce(intersect, genes.list[indexes]))
 }
 
-create.heatmap <- function(data, stages, genes, col = NULL, labs = NULL,
-                           title)
+create.heatmap <- function(data, stages, genes, title, col = NULL, labs = NULL)
 {
+  #View(data)
   library(pheatmap)
   stage.ind.levels <- list()
   if(length(stages) != length(rownames(data)))
@@ -247,5 +247,20 @@ get.mean <- function(class.list, ind, mode)
   return(mean(req.values))
 }
 
-
+get.aucs <- function(acc.list)
+{
+  aucs <- sapply(acc.list, function(acc)
+    {
+    acc$eval$auc
+  })
+  return(aucs)
+}
+get.conf.mat <- function(res)
+{
+  conf.mat <- lapply(res, function(x)
+    {
+    x$conf_mat
+  })
+  return(conf.mat)
+}
   
