@@ -51,7 +51,8 @@ cv.rf <- function(data, folds, stages.levels,sampsize = if (replace) nrow(data) 
   
   if(length(gr) != folds)
     return('kat gaya')
-  predicted <- factor(rep(c('stage i'), total.samp), levels = c('stage i', 'stage iv'))
+  classes <- levels(as.factor(stages.levels))
+  predicted <- factor(rep(c(classes[1]), total.samp), levels = classes)
   for(i in seq(folds))
   {
     train.index = sort(unlist(gr[-i]))
@@ -64,16 +65,18 @@ cv.rf <- function(data, folds, stages.levels,sampsize = if (replace) nrow(data) 
 }
 
 cv.svm <- function(data, folds, stages.levels, gamma = 0, kernel = 'linear', cost =1,
-                   class.weights =if(length(levels(stages.levels)) == 4) c('stage i' = 1, 'stage ii' =1, 
-                                                                           'stage iii' = 1, 'stage iv' =1)
-                   else c('stage i' = 1, 'stage iv' = 1))
+                   class.weights = sapply(levels(as.factor(sample_micro_info$stage)), function(x){
+                     c(x=1)
+                   } ))
 {
+  names(class.weights) = levels(as.factor(sample_micro_info$stage))
   total.samp <- length(rownames(data))
   gr <- build.groups(total.samp, folds)
   if(length(gr) != folds)
     return('kat gaya')
   
-  predicted <- factor(rep(c('stage i'), total.samp), levels = c('stage i', 'stage iv'))
+  classes <- levels(as.factor(stages.levels))
+  predicted <- factor(rep(c(classes[1]), total.samp), levels = classes)
   for(i in seq(folds))
   {
     train.index = sort(unlist(gr[-i]))
@@ -93,7 +96,9 @@ cv.knn <- function(data, folds, stages.levels, k)
   
   if(length(gr) != folds)
     return('kat gaya')
-  predicted <- factor(rep(c('stage i'), total.samp), levels = c('stage i', 'stage iv'))
+  classes <- levels(as.factor(stages.levels))
+  predicted <- factor(rep(c(classes[1]), total.samp), levels = classes)
+  
   for(i in seq(folds))
   {
     train.index = sort(unlist(gr[-i]))
@@ -112,13 +117,14 @@ cv.naiveBayes <- function(data, folds, stages.levels)
   
   if(length(gr) != folds)
     return('kat gaya')
-  predicted <- factor(rep(c('stage i'), total.samp), levels = c('stage i', 'stage iv'))
+  classes <- levels(as.factor(stages.levels))
+  predicted <- factor(rep(c(classes[1]), total.samp), levels = classes)
   for(i in seq(folds))
   {
     train.index = sort(unlist(gr[-i]))
     test.index = sort(unlist(gr[i]))
-    nb.model <- naiveBayes(x = data[train.index, ], y = stages.levels[train.index])
-    
+    nb.model <- naiveBayes(x = data[train.index, ], y = as.factor(stages.levels[train.index]))
+    #print(predict(object = nb.model, newdata=data[train.index,]))
     predicted[test.index] <- predict(nb.model, data[test.index,])
   }
   return(predicted)
@@ -156,11 +162,13 @@ get.results <- function(actual.cv, pred.cv, actual.test, pred.test, conf.mat, ev
 
 find.best.k <- function(data, folds, stages.levels)
 {
+  
   library(pROC)
-  cv.pred <- lapply(seq(10), function(k){
+  cv.pred <- lapply(seq(folds), function(k){
       cv.knn(data, folds, stages.levels, k)
       })
-  aucs <- sapply(seq(10), function(k)
+  
+  aucs <- sapply(seq(folds), function(k)
   {
     multiclass.roc(stages.levels, ordered(cv.pred[[k]]))$auc
   })

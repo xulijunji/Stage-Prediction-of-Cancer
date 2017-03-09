@@ -139,8 +139,8 @@ sample_micro_info$class <- c(2,1,1,1,1,1,1,1,1,1,
                              1,1,1,1,1,2,1,2,2,1,
                              1,1,2,2,2,1,1,1,1,2,
                              2,2,2,2)
-sample_micro_info$stage <- c(2,1,1,1,1,2,1,1,1,2,
-                             1,1,1,2,1,2,2,1,2,1,
-                             1,1,2,2,2,1,1,1,1,2,
-                             2,2,2,2)
+sample_micro_info$stage <- c(4,1,1,1,1,4,1,1,1,4,
+                             1,1,1,4,1,4,4,1,4,1,
+                             1,1,4,4,4,1,1,1,1,4,
+                             4,4,4,4)
 save(sample_micro_info, file = 'environment/accuracy_feature/updated/col_micro.RData')

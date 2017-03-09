@@ -230,10 +230,10 @@ final.res <- function(data, train.ind, test.ind, stages.levels, genes, folds)
   ##Classifiers
   train.list <- list()
   train.list[['shrunken']] <- pamr.train(list(x = t(as.matrix(data[train.ind, genes])), 
-                                              y = stages.levels.comb[train.ind]))
-  train.list[['svm']] <-  svm(x = data[train.ind, genes], y = stages.levels.comb[train.ind])
-  train.list[['nb']] <- naiveBayes(x = data[train.ind, genes], y = stages.levels.comb[train.ind])
-  train.list[['rf']] <- randomForest(x = data[train.ind, genes], y = stages.levels.comb[train.ind])
+                                              y = stages.levels[train.ind]))
+  train.list[['svm']] <-  svm(x = data[train.ind, genes], y = stages.levels[train.ind])
+  train.list[['nb']] <- naiveBayes(x = data[train.ind, genes], y = stages.levels[train.ind])
+  train.list[['rf']] <- randomForest(x = data[train.ind, genes], y = stages.levels[train.ind])
 
   ###Predicted
   pred.cv.list <- list()
@@ -244,14 +244,17 @@ final.res <- function(data, train.ind, test.ind, stages.levels, genes, folds)
   pred.cv.list[['svm']] <- cv.svm.list(data, folds, list(genes), train.ind, stages.levels)
   pred.cv.list[['nb']] <- cv.nb.list(data, folds, list(genes), train.ind, stages.levels)
   
+  as.factor(sample_micro_info$stage)
   pred.test.class <- list()
   pred.test.class[['shrunken']] <- pamr.predict(train.list$shrunken, t(as.matrix(data[test.ind, genes])),
                                     threshold = train.list$shrunken$threshold[pred.cv.list$shrunken$thr])
   pred.test.class[['svm']] <- predict(train.list$svm, data[test.ind, genes])
   pred.test.class[['rf']] <- predict(train.list$rf, data[test.ind, genes])
   pred.test.class[['nb']] <- predict(train.list$nb, data[test.ind, genes])
+  
   pred.test.class[['knn']] <- knn(data[train.ind, genes], data[test.ind, genes],
                                   stages.levels[train.ind], pred.cv.list$knn$best_k)
+  
   
   #CV results
   #print(pred.cv.list)
@@ -260,14 +263,15 @@ final.res <- function(data, train.ind, test.ind, stages.levels, genes, folds)
 #   print(length(pred.cv.list$shrunken$pred[[1]]))
 #   print(length(pred.cv.list$knn$pred))
 #   print(length(pred.cv.list$svm[[1]]))
-  res.cv[['shrunken']] <- get.eval(stages.levels[train.ind], pred.cv.list$shrunken$pred[[1]])
-  res.cv[['knn']] <- get.eval(stages.levels[train.ind], pred.cv.list$knn$pred)
-  res.cv[c('svm','rf', 'nb')] <- lapply(pred.cv.list[c('svm','rf', 'nb')], function(pred.cv){
+ res.cv[['shrunken']] <- get.eval(stages.levels[train.ind], pred.cv.list$shrunken$pred[[1]])
+ res.cv[['knn']] <- get.eval(stages.levels[train.ind], pred.cv.list$knn$pred)
+ res.cv[c('svm','rf', 'nb')] <- lapply(pred.cv.list[c('svm','rf', 'nb')], function(pred.cv){
                                        get.eval(stages.levels[train.ind], pred.cv[[1]])
                                       })
+  
   ##Test Results
   res.test <- lapply(pred.test.class, function(pred.test){
     get.eval(stages.levels[test.ind], pred.test)
- })
- return(list(res.cv, res.test))
+})
+return(list(res.cv, res.test))
 }
