@@ -43,7 +43,18 @@ get.stage.distribution <- function(gr, stages)
   return(stage.dist)
 }
 
-cv.rf <- function(data, folds, stages.levels,sampsize = if (replace) nrow(data) else ceiling(.632*nrow(data)))
+check.pca.var <- function(pca.var, train.data, test.data)
+{
+  if(pca.var)
+  {
+    pca.list <- do.pca(train.data, test.data)
+    train.data <- pca.list[[1]]
+    test.data <- pca.list[[2]]
+  }
+  return(list(train.data, test.data))
+}
+
+cv.rf <- function(data, folds, stages.levels,pca.var,sampsize = if (replace) nrow(data) else ceiling(.632*nrow(data)))
 {
   library(randomForest)
   total.samp <- length(rownames(data))
@@ -57,19 +68,20 @@ cv.rf <- function(data, folds, stages.levels,sampsize = if (replace) nrow(data) 
   {
     train.index = sort(unlist(gr[-i]))
     test.index = sort(unlist(gr[i]))
-    rf.model <- randomForest(x = data[train.index, ], y = stages.levels[train.index])
-    pr <- predict(rf.model, data[test.index, ])
+    data.list <- get.pca.var(pca.var, data[train.index,], data[test.index,])
+    rf.model <- randomForest(x = data.list[[1]], y = stages.levels[train.index])
+    pr <- predict(rf.model, data.list[[2]])
     predicted[test.index] <- pr
   }
   return(predicted)
 }
 
-cv.svm <- function(data, folds, stages.levels, gamma = 0, kernel = 'linear', cost =1,
-                   class.weights = sapply(levels(as.factor(sample_micro_info$stage)), function(x){
+cv.svm <- function(data, folds, stages.levels, gamma = 0, pca.var = F, kernel = 'linear', cost =1,
+                   class.weights = sapply(levels(as.factor(stages.levels)), function(x){
                      c(x=1)
                    } ))
 {
-  names(class.weights) = levels(as.factor(sample_micro_info$stage))
+  names(class.weights) = levels(as.factor(stages.levels))
   total.samp <- length(rownames(data))
   gr <- build.groups(total.samp, folds)
   if(length(gr) != folds)
@@ -81,14 +93,18 @@ cv.svm <- function(data, folds, stages.levels, gamma = 0, kernel = 'linear', cos
   {
     train.index = sort(unlist(gr[-i]))
     test.index = sort(unlist(gr[i]))
-    svm.model <- svm(x = data[train.index, ], y = stages.levels[train.index], kernel = kernel, gamma = gamma)
-    pr <- predict(svm.model, data[test.index, ])
+    data.list <- get.pca.var(pca.var, data[train.index, ], data[test.index, ])
+    train.data = data.list[[1]]
+    test.data = data.list[[2]]
+    
+    svm.model <- svm(x = train.data, y = stages.levels[train.index], kernel = kernel, gamma = gamma)
+    pr <- predict(svm.model, test.data)
     predicted[test.index] <- pr
   }
   return(predicted)
 }
 
-cv.knn <- function(data, folds, stages.levels, k)
+cv.knn <- function(data, folds, stages.levels, k, pca.var = F)
 {
   library(class)
   total.samp <- length(rownames(data))
@@ -103,13 +119,14 @@ cv.knn <- function(data, folds, stages.levels, k)
   {
     train.index = sort(unlist(gr[-i]))
     test.index = sort(unlist(gr[i]))
-    predicted[test.index] <- knn(train = data[train.index, ], test = data[test.index,], k = k, 
+    data.list <- get.pca.var(pca.var, data[train.index,], data[test.index,])
+    predicted[test.index] <- knn(train = data.list[[1]], test = data.list[[2]], k = k, 
                                  cl = stages.levels[train.index])
   }
   return(predicted)
 }
 
-cv.naiveBayes <- function(data, folds, stages.levels)
+cv.naiveBayes <- function(data, folds, stages.levels, pca.var)
 {
   library(e1071)
   total.samp <- length(rownames(data))
@@ -123,9 +140,12 @@ cv.naiveBayes <- function(data, folds, stages.levels)
   {
     train.index = sort(unlist(gr[-i]))
     test.index = sort(unlist(gr[i]))
-    nb.model <- naiveBayes(x = data[train.index, ], y = as.factor(stages.levels[train.index]))
+    data.list <- get.pca.var(pca.var, data[train.index, ], data[test.index, ], 5)
+    train.data = data.list[[1]]
+    test.data = data.list[[2]]
+    nb.model <- naiveBayes(x = train.data, y = as.factor(stages.levels[train.index]))
     #print(predict(object = nb.model, newdata=data[train.index,]))
-    predicted[test.index] <- predict(nb.model, data[test.index,])
+    predicted[test.index] <- predict(nb.model, test.data)
   }
   return(predicted)
 }
@@ -160,12 +180,12 @@ get.results <- function(actual.cv, pred.cv, actual.test, pred.test, conf.mat, ev
   return(list(conf.mat, eval.mat))
 }
 
-find.best.k <- function(data, folds, stages.levels)
+find.best.k <- function(data, folds, stages.levels, pca.var = F)
 {
   
   library(pROC)
   cv.pred <- lapply(seq(folds), function(k){
-      cv.knn(data, folds, stages.levels, k)
+      cv.knn(data, folds, stages.levels, k, pca.var)
       })
   
   aucs <- sapply(seq(folds), function(k)
@@ -198,7 +218,9 @@ get.intersect.genes <- function(genes.list, indexes)
   return(Reduce(intersect, genes.list[indexes]))
 }
 
-create.heatmap <- function(data, stages, genes, title, col = NULL, labs = NULL)
+create.heatmap <- function(data, stages, genes, title, col = NULL, labs = NULL,
+                           show_colnames = F, show_rownames = F,
+                           cluster_cols = F, cluster_rows = F)
 {
   #View(data)
   library(pheatmap)
@@ -219,10 +241,12 @@ create.heatmap <- function(data, stages, genes, title, col = NULL, labs = NULL)
     labs = rownames(data)[row.indexes]
   pheatmap(t(data[row.indexes, genes]),
            labels_col = labs,
-           show_colnames = F,
-           cluster_cols = F, 
+           cluster_cols = cluster_cols, 
+           cluster_rows = cluster_rows,
+           show_rownames = show_rownames,
+           show_colnames = show_rownames,
            annotation_col = annotation_col,
-           color = col, main = title, fontsize = 20)
+           color = col, main = title, fontsize = 10)
 }
   
 get.genes.common <- function(genes.list, max.no.of.models)

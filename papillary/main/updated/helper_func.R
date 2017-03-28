@@ -10,6 +10,24 @@ source('shrunken/pamr.listgenes.R')
 
 
 ###Feature Selection
+do.pca <- function(train.data, test.data, thr = 10)
+{
+  pca.ob <- prcomp(train.data)
+  train.data <- pca.ob$x[,1:10]
+  test.data <- predict(pca.ob, test.data)[,1:thr]
+  return(list(train.data, test.data))
+}
+get.pca.var <- function(pca.var = F, train.data, test.data, thr)
+{
+  if(pca.var)
+  {
+      data <- do.pca(train.data, test.data)
+      train.data <- data[[1]]
+      test.data <- data[[2]]
+  }
+  return(list(train.data, test.data))
+}
+
 get.shrunken.features <- function(gr, data, stages.levels)
 {
   pamr.train.list <- list()
@@ -69,7 +87,7 @@ build.shrunken.classifier <- function(data, train.ind, genes.list, stages.levels
 }
 
 build.svm.classifier <- function(data, train.ind, genes.list,
-                                  stages.levels, gamma = 0, kernel = 'linear', cost =1,
+                                  stages.levels, pca_var = F, gamma = 0, kernel = 'linear', cost =1,
                                   class.weights =if(length(levels(stages.levels)) == 4) 
                                 c('stage i' = 1, 'stage ii' =1, 'stage iii' = 1, 'stage iv' =1)
                                   else c('stage i' = 1, 'stage iv' = 1))
@@ -92,11 +110,13 @@ build.nb.classifier <- function(data, train.ind, genes.list, stages.levels)
 }
 
 ###Cross validation Models
-cv.shrunken <- function(data, folds, genes.list, train.models.list, train.ind, stages.levels)
+cv.shrunken <- function(data, folds, genes.list, train.models.list, train.ind, stages.levels, pca.var=F)
 {
   cv.models <- lapply(seq_along(genes.list), function(i)
   {
-    pamr.cv(train.models.list[[i]], list(x = t(as.matrix(data[train.ind, genes.list[[i]]])),
+    data.list <- get.pca.var(pca.var, data[train.ind, genes.list[[i]]], data[train.ind, genes.list[[i]]])
+    train.data <- data.list[[1]]
+    pamr.cv(train.models.list[[i]], list(x = t(as.matrix(train.data)),
                               y = stages.levels[train.ind]), folds)
   })
   names(cv.models) <- names(genes.list)
@@ -116,7 +136,7 @@ cv.shrunken <- function(data, folds, genes.list, train.models.list, train.ind, s
   return(res)
 }
 
-cv.svm.list <- function(data, folds, genes.list, train.ind, stages.levels,
+cv.svm.list <- function(data, folds, genes.list, train.ind, stages.levels, pca.var =F,
                         gamma = 0, kernel = 'linear', cost =1,
                         class.weights =if(length(levels(stages.levels)) == 4) 
                           c('stage i' = 1, 'stage ii' =1, 'stage iii' = 1, 'stage iv' =1)
@@ -124,35 +144,35 @@ cv.svm.list <- function(data, folds, genes.list, train.ind, stages.levels,
 {
   svm.pred <- lapply(genes.list, function(genes)
     {
-    cv.svm(data[train.ind, genes], folds, stages.levels[train.ind])
+    cv.svm(data[train.ind, genes], folds, stages.levels[train.ind], pca.var)
   })
   names(svm.pred) <- names(genes.list)
   return(svm.pred)
 }
 
-cv.rf.list <- function(data, folds, genes.list, train.ind, stages.levels,
+cv.rf.list <- function(data, folds, genes.list, train.ind, stages.levels, pca.var = F,
                        sampsize = if (replace) nrow(data)
                        else ceiling(.632*nrow(data)))
 {
   rf.pred <- lapply(genes.list, function(genes)
     {
-    cv.rf(data[train.ind, genes], folds, stages.levels[train.ind])
+    cv.rf(data[train.ind, genes], folds, stages.levels[train.ind], pca.var)
   })
   names(rf.pred) <- names(genes.list)
   return(rf.pred)
 }
 
-cv.nb.list <- function(data, folds, genes.list, train.ind, stages.levels)
+cv.nb.list <- function(data, folds, genes.list, train.ind, stages.levels, pca.var = F)
 {
   nb.pred <- lapply(genes.list, function(genes)
   {
-    cv.naiveBayes(data[train.ind, genes], folds, stages.levels[train.ind])
+    cv.naiveBayes(data[train.ind, genes], folds, stages.levels[train.ind], pca.var)
   })
   names(nb.pred) <- names(genes.list)
   return(nb.pred)
 }
 
-cv.knn.list <- function(data, folds, genes.list, train.ind, stages.levels)
+cv.knn.list <- function(data, folds, genes.list, train.ind, stages.levels, pca.var = F)
 {
   knn.pred <- lapply(genes.list, function(genes)
   {
@@ -225,34 +245,36 @@ get.eval <- function(actual.stages, pred.stages)
 #     pamr.predict(train.model, t(data[test.ind, genes]), )
 #   }, train.model.list, genes.list)
 # }
-final.res <- function(data, train.ind, test.ind, stages.levels, genes, folds)
+final.res <- function(data, train.ind, test.ind, stages.levels, genes, folds, pca.var = F)
 {
+  data.req <- get.pca.var(pca.var, data[train.ind, genes], data[test.ind, genes])
+  train.data <- data.req[[1]]
+  test.data <- data.req[[2]]
   ##Classifiers
   train.list <- list()
-  train.list[['shrunken']] <- pamr.train(list(x = t(as.matrix(data[train.ind, genes])), 
+  train.list[['shrunken']] <- pamr.train(list(x = t(as.matrix(train.data)), 
                                               y = stages.levels[train.ind]))
-  train.list[['svm']] <-  svm(x = data[train.ind, genes], y = stages.levels[train.ind])
-  train.list[['nb']] <- naiveBayes(x = data[train.ind, genes], y = stages.levels[train.ind])
-  train.list[['rf']] <- randomForest(x = data[train.ind, genes], y = stages.levels[train.ind])
-
+  train.list[['svm']] <-  svm(x = train.data, y = stages.levels[train.ind])
+  train.list[['nb']] <- naiveBayes(x = train.data, y = stages.levels[train.ind])
+  train.list[['rf']] <- randomForest(x = train.data, y = stages.levels[train.ind])
+  #return(train.list)
   ###Predicted
-  pred.cv.list <- list()
-  pred.cv.list[['shrunken']] <- cv.shrunken(data, folds, list(genes), list(train.list$shrunken), 
-                                             train.ind, stages.levels)
-  pred.cv.list[['knn']] <- find.best.k(data[train.ind, genes], folds, stages.levels[train.ind])
-  pred.cv.list[['rf']] <- cv.rf.list(data, folds, list(genes), train.ind, stages.levels)
-  pred.cv.list[['svm']] <- cv.svm.list(data, folds, list(genes), train.ind, stages.levels)
-  pred.cv.list[['nb']] <- cv.nb.list(data, folds, list(genes), train.ind, stages.levels)
-  
-  as.factor(sample_micro_info$stage)
+   pred.cv.list <- list()
+   pred.cv.list[['shrunken']] <- cv.shrunken(data, folds, list(genes), list(train.list$shrunken), 
+                                              train.ind, stages.levels, pca.var)
+   pred.cv.list[['knn']] <- find.best.k(data[train.ind, genes], folds, stages.levels[train.ind], pca.var)
+   pred.cv.list[['rf']] <- cv.rf.list(data, folds, list(genes), train.ind, stages.levels, pca.var)
+   pred.cv.list[['svm']] <- cv.svm.list(data, folds, list(genes), train.ind, stages.levels, pca.var)
+   pred.cv.list[['nb']] <- cv.nb.list(data, folds, list(genes), train.ind, stages.levels, pca.var)
+   
   pred.test.class <- list()
-  pred.test.class[['shrunken']] <- pamr.predict(train.list$shrunken, t(as.matrix(data[test.ind, genes])),
+  pred.test.class[['shrunken']] <- pamr.predict(train.list$shrunken, t(as.matrix(test.data)),
                                     threshold = train.list$shrunken$threshold[pred.cv.list$shrunken$thr])
-  pred.test.class[['svm']] <- predict(train.list$svm, data[test.ind, genes])
-  pred.test.class[['rf']] <- predict(train.list$rf, data[test.ind, genes])
-  pred.test.class[['nb']] <- predict(train.list$nb, data[test.ind, genes])
+  pred.test.class[['svm']] <- predict(train.list$svm, test.data)
+  pred.test.class[['rf']] <- predict(train.list$rf, test.data)
+  pred.test.class[['nb']] <- predict(train.list$nb, test.data)
   
-  pred.test.class[['knn']] <- knn(data[train.ind, genes], data[test.ind, genes],
+  pred.test.class[['knn']] <- knn(train.data, test.data,
                                   stages.levels[train.ind], pred.cv.list$knn$best_k)
   
   

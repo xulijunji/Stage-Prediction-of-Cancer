@@ -63,11 +63,46 @@ cv.results$deseq2_2[c('svm','rf', 'nb')] <- lapply(cv.model$deseq2_2[c('svm','rf
                                                    function(pred.cv){
                                            get.eval.list(stages.levels.comb[train.indexes], pred.cv)
                                                    })
+
+cv.results[['deseq2_1.5']] <- list()
+cv.results$deseq2_1.5[['shrunken']] <- get.eval.list(stages.levels.comb[train.indexes],
+                                                   cv.model$deseq2_1.5$shrunken$pred)
+knn.pred <- lapply(cv.model$deseq2_1.5$knn, function(model)
+{
+  model$pred
+})
+cv.results$deseq2_1.5[['knn']] <- get.eval.list(stages.levels.comb[train.indexes], knn.pred)
+cv.results$deseq2_1.5[c('svm','rf', 'nb')] <- lapply(cv.model$deseq2_1.5[c('svm','rf', 'nb')],
+                                                   function(pred.cv){
+                                                     get.eval.list(stages.levels.comb[train.indexes], pred.cv)
+                                                   })
+
+cv.results[['deseq2_1']] <- list()
+cv.results$deseq2_1[['shrunken']] <- get.eval.list(stages.levels.comb[train.indexes],
+                                                   cv.model$deseq2_1$shrunken$pred)
+knn.pred <- lapply(cv.model$deseq2_1$knn, function(model)
+{
+  model$pred
+})
+cv.results$deseq2_1[['knn']] <- get.eval.list(stages.levels.comb[train.indexes], knn.pred)
+cv.results$deseq2_1[c('svm','rf', 'nb')] <- lapply(cv.model$deseq2_1[c('svm','rf', 'nb')],
+                                                   function(pred.cv){
+                                                     get.eval.list(stages.levels.comb[train.indexes], pred.cv)
+                                                   })
 #######Test#########
 test.results[['deseq2_2']] <- list()
 test.results$deseq2_2 <- lapply(test.pred$deseq2_2, function(pred.test){
   get.eval.list(stages.levels.comb[test.indexes], pred.test)
 })
+test.results[['deseq2_1.5']] <- list()
+test.results$deseq2_1.5 <- lapply(test.pred$deseq2_1.5, function(pred.test){
+  get.eval.list(stages.levels.comb[test.indexes], pred.test)
+})
+test.results[['deseq2_1']] <- list()
+test.results$deseq2_1 <- lapply(test.pred$deseq2_1, function(pred.test){
+  get.eval.list(stages.levels.comb[test.indexes], pred.test)
+})
+
 ###############DeSeq2 feature#################
 save(cv.results, file = 'environment/accuracy_feature/updated/cv_results.RData')
 save(test.results, file = 'environment/accuracy_feature/updated/test_results.RData')
