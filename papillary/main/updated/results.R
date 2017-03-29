@@ -106,3 +106,17 @@ test.results$deseq2_1 <- lapply(test.pred$deseq2_1, function(pred.test){
 ###############DeSeq2 feature#################
 save(cv.results, file = 'environment/accuracy_feature/updated/cv_results.RData')
 save(test.results, file = 'environment/accuracy_feature/updated/test_results.RData')
+
+###Final Performance
+perf.test <- list()
+perf.test[['mean']] <- list()
+perf.test$mean <- lapply(test.results, function(x)
+  {
+  publish.results(x, type = 'mean')
+})
+perf.test$mean$varSelRF <- publish.results(test.results$varSelRF, indexes = c(1,2,3))
+perf.test$max <- lapply(test.results, function(x)
+{
+  publish.results(x, type = 'max')
+})
+perf.test$max$varSelRF <- publish.results(test.results$varSelRF, indexes = c(1,2,3), type = 'max')

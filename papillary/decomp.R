@@ -295,4 +295,150 @@ get.conf.mat <- function(res)
   })
   return(conf.mat)
 }
+
+get.accuracy <- function(res)
+{
+  acc <- lapply(res, function(x)
+    {
+    x$eval$other$overall[[1]]
+  })
+  return(acc)
+}
+
+get.sens <- function(res)
+{
+  sens <- lapply(res, function(x)
+  {
+    x$eval$other$byClass[1]
+  })
+  return(sens)
+}
+
+get.spec <- function(res)
+{
+  spec <-  lapply(res, function(x)
+    {
+    x$eval$other$byClass[2]
+  })  
+  return(spec)
+}
+
+get.f <- function(res)
+{
+  f.val <-  lapply(res, function(x)
+  {
+    x$eval$other$byClass[7]
+  })  
+  return(f.val)
+}
+
+get.sep.vals <- function(res.eval)
+{
+  vals <- sapply(res.eval, function(res)
+    {
+    res[[1]]
+  })
+  other.val <- sapply(res.eval, function(res)
+  {
+    res[[2]]
+  })
+  return(list(met = vals, dev = other.val))
+}
+
+get.dfs.res <- function(res.param.eval, type)
+{
+  sep.vals <- lapply(res.param.eval, get.sep.vals)
+  auc.ind <- which(names(sep.vals) == 'aucs')
+  f.ind <- which(names(sep.vals) == 'f.val')
+  j <- 0
+  sep.vals <- lapply(sep.vals, function(x)
+    {
+    j <<- j + 1
+    
+    if(j != auc.ind &  j != f.ind)
+    {
+      if(type == 'mean')
+      {
+        x <- lapply(x, function(y) y * 100)
+        x <- lapply(x, function(y) formatC(y, digits = 2, format = 'f'))
+      }
+      else 
+      {
+        x[[1]] <- x[[1]]*100
+        x[[2]] <- x[[2]]
+        x[[1]] <- formatC(x[[1]], digits = 2, format = 'f')
+        x[[2]] <- as.character(x[[2]])
+        x <- list(met = x[[1]], dev = x[[2]])
+      }
+    }
+    else
+    {
+      if(type == 'mean')
+        x <- lapply(x, function(y) formatC(y, digits = 4, format = 'f'))
+      else
+      {
+        x[[1]] <- formatC(x[[1]], digits = 4, format = 'f')
+        x[[2]] <- as.character(x[[2]])
+        x <- list(met = x[[1]], dev = x[[2]])
+      }
+    }
+    
+  })
+  sep.text <- '\u00b1'
+  if(type != 'mean')
+    sep.text <- ','
+  #print(sep.vals)
+  dfs <- data.frame(Accuracy = paste(sep.vals$accuracy$met, sep.vals$accuracy$dev, sep = sep.text),
+                    Aucs = paste(sep.vals$aucs$met, sep.vals$aucs$dev, sep = sep.text),
+                    Specificity = paste(sep.vals$spec$met, sep.vals$spec$dev, sep = sep.text),
+                    Sensitivity = paste(sep.vals$sens$met, sep.vals$sens$dev, sep = sep.text),
+                    FValue = paste(sep.vals$f.val$met, sep.vals$f.val$dev, sep = sep.text)
+                    )
+  #print(dfs)
+  rownames(dfs) <- names(res.param.eval[[1]])
+  return(dfs)
+}
   
+
+publish.results <- function(res.list, folder = NULL, type = 'mean', indexes = seq(length(res.list[[1]])))
+{
+  aucs <- lapply(res.list, function(class.res)
+  {
+    atleast.aucs <- get.aucs(class.res[indexes])
+  })
+  
+  acc <- lapply(res.list, function(class.res)
+  {
+    atleast.acc <- get.accuracy(class.res[indexes])
+  })
+  spec <- lapply(res.list, function(class.res)
+    {
+     atleast.spec <- get.spec(class.res[indexes])
+  })
+  sens <- lapply(res.list, function(class.res)
+  {
+    atleast.spec <- get.sens(class.res[indexes])
+  })
+  f.val <- lapply(res.list, function(class.res)
+  {
+    atleast.spec <- get.f(class.res[indexes])
+  })
+  #print(acc)
+  req.list <- list(aucs, acc, spec, sens, f.val)
+  final <- lapply(req.list, function(param)
+   {
+    lapply(param, function(x)
+    {
+      x <- unlist(x)
+      if(type == 'mean')
+        list(mean(x), sd(x))
+      else if(type == 'max')
+       list(max(x), which.max(x))
+      else
+        list(min(x), which.min(x))
+    })
+  })
+  names(final) <- c('aucs', 'accuracy', 'spec', 'sens', 'f.val')
+  acc.res <- get.dfs.res(final, type)
+  return(acc.res)
+}
