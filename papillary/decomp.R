@@ -9,6 +9,7 @@ source('after_class.R')
 build.groups <- function(total.samples, num.group)
 {
   gr=NULL
+#  print(num.group)
   num.sel=floor(total.samples/num.group)
   num.add=total.samples%%num.group
   range=1:total.samples
@@ -220,7 +221,8 @@ get.intersect.genes <- function(genes.list, indexes)
 
 create.heatmap <- function(data, stages, genes, title, col = NULL, labs = NULL,
                            show_colnames = F, show_rownames = F,
-                           cluster_cols = F, cluster_rows = F)
+                           cluster_cols = F, cluster_rows = F,
+                           legend_breaks = NULL, breaks = NULL)
 {
   #View(data)
   library(pheatmap)
@@ -233,10 +235,9 @@ create.heatmap <- function(data, stages, genes, title, col = NULL, labs = NULL,
     stage.ind.levels[[stage]] = which(stages == stage)
   }
   row.indexes <- Reduce(union, stage.ind.levels)
-  #print(row.indexes)
+  annotation_col = NULL
   annotation_col = data.frame(names = stages[row.indexes])
   rownames(annotation_col) = rownames(data)[row.indexes]
-  #print(stages[row.indexes])
   if(!is.null(labs))
     labs = rownames(data)[row.indexes]
   pheatmap(t(data[row.indexes, genes]),
@@ -244,9 +245,11 @@ create.heatmap <- function(data, stages, genes, title, col = NULL, labs = NULL,
            cluster_cols = cluster_cols, 
            cluster_rows = cluster_rows,
            show_rownames = show_rownames,
-           show_colnames = show_rownames,
+           show_colnames = show_colnames,
            annotation_col = annotation_col,
-           color = col, main = title, fontsize = 10)
+           color = col, main = title, fontsize = 10,
+           legend_breaks = legend_breaks,
+           breaks = breaks)
 }
   
 get.genes.common <- function(genes.list, max.no.of.models)
@@ -400,7 +403,7 @@ get.dfs.res <- function(res.param.eval, type)
 }
   
 
-publish.results <- function(res.list, folder = NULL, type = 'mean', indexes = seq(length(res.list[[1]])))
+publish.results <- function(res.list, type = 'mean', indexes = seq(length(res.list[[1]])))
 {
   aucs <- lapply(res.list, function(class.res)
   {
@@ -441,4 +444,151 @@ publish.results <- function(res.list, folder = NULL, type = 'mean', indexes = se
   names(final) <- c('aucs', 'accuracy', 'spec', 'sens', 'f.val')
   acc.res <- get.dfs.res(final, type)
   return(acc.res)
+}
+
+write.dfs.csvs <- function(folder, lists)
+{
+  for(i in seq_along(lists))
+    write.csv(lists[[i]], paste(folder, names(lists)[i], '.csv'))
+}
+
+change.microarray <- function(micr.df, genes.list, micr.genes, stage, folds)
+{
+  temp <- lapply(genes.list, function(genes)
+    {
+    genes <- intersect(micr.genes, genes)
+    indexes <- seq(length(rownames(micr.df)))
+    res_micr <- final.res(micr.df, train.ind = indexes, test.ind = indexes, 
+                          stage, genes, folds)
+    res_micr <- res_micr[[1]]
+  })
+  names(temp) <- names(genes.list)
+  names.genes <- names(temp)
+  names.class <- names(temp[[1]])
+  res <- list()
+  res <- lapply(seq_along(temp[[1]]), function(i)
+    {
+    res[[names.class[i]]] <<- list()
+    res[[names.class[i]]] <<- lapply(seq_along(temp), function(j){
+      res[[names.class[i]]][[names.genes[j]]] <<- temp[[names.genes[j]]][[names.class[i]]]
+    })
+    #names(res[[names.class[i]]])  = names.genes
+    #print(typeof(res[[names.class[[i]]]]))
+  })
+  for(i in seq_along(res))
+    names(res[[i]]) <- names.genes
+  names(res) <- names.class
+  return(res)
+}
+
+create.net.df <- function(test.ac)
+{
+  req.df <- list()
+  req.df$auc <- c()
+  req.df$accuracy <- c()
+  req.df$sens <- c()
+  req.df$spec <- c()
+  req.df$f_val <- c()
+  req.df$classifier <- c()
+  req.df$feature_sel <- c()
+  for(j in seq_along(test.ac))
+  {
+    test.ob <- test.ac[[j]]
+    for(i in seq_along(test.ob))
+    {
+      req.df$auc <- c(req.df$auc, unlist(get.aucs(test.ob[[i]])))
+      req.df$accuracy <- c(req.df$accuracy, unlist(get.accuracy(test.ob[[i]])))
+      req.df$sens <- c(req.df$sens, unlist(get.sens(test.ob[[i]])))
+      req.df$spec <- c(req.df$spec, unlist(get.spec(test.ob[[i]])))
+      req.df$f_val <- c(req.df$f_val, unlist(get.f(test.ob[[i]])))
+      req.df$classifier <- c(req.df$classifier,rep(names(test.ob)[i], 
+                                  length(unlist(get.f(test.ob[[i]])))))
+      req.df$feature_sel <- c(req.df$feature_sel,rep(names(test.ac)[j],
+                          length(unlist(get.f(test.ob[[i]])))))
+    }
+  }
+  df <- data.frame(AUC <- req.df$auc,  Accuracy <- req.df$accuracy, 
+                   Sensitivity <- req.df$sens, Specificity <- req.df$spec,
+                   F_Value <- req.df$f_val, Classifier <- req.df$classifier,
+                   Feature_Selection <- req.df$feature_sel)
+  colnames(df) <- c('AUC', 'Accuracy', 'Sensitivity', 'Specificity', 'F_val', 
+                    'Classifier', 'Feature_Selection')
+  return(df)
+}
+summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
+                      conf.interval=.95, .drop=TRUE) {
+  library(plyr)
+  
+  # New version of length which can handle NA's: if na.rm==T, don't count them
+  length2 <- function (x, na.rm=FALSE) {
+    if (na.rm) sum(!is.na(x))
+    else       length(x)
+  }
+  
+  # This does the summary. For each group's data frame, return a vector with
+  # N, mean, and sd
+  datac <- ddply(data, groupvars, .drop=.drop,
+                 .fun = function(xx, col) {
+                   c(N    = length2(xx[[col]], na.rm=na.rm),
+                     mean = mean   (xx[[col]], na.rm=na.rm),
+                     sd   = sd     (xx[[col]], na.rm=na.rm)
+                   )
+                 },
+                 measurevar
+  )
+  
+  # Rename the "mean" column    
+  datac <- rename(datac, c("mean" = measurevar))
+  
+  datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
+  
+  # Confidence interval multiplier for standard error
+  # Calculate t-statistic for confidence interval: 
+  # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
+  ciMult <- qt(conf.interval/2 + .5, datac$N-1)
+  datac$ci <- datac$se * ciMult
+  
+  return(datac)
+}
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+get.clust.score <- function(data, genes, stages, classes)
+{
+  library(mclust)
+  clust <- kmeans(data[,genes], classes)
+  return(adjustedRandIndex(clust$cluster, stages))
 }

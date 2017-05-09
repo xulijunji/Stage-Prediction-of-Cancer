@@ -128,6 +128,21 @@ deseq2_1 <- lapply(net.features.updated$deseq2[c(3,4,5,6)], function(genes.list)
 {
   genes.list[['1 fold']]  
 })
+deseq2_2.5 <- lapply(net.features.updated$deseq2[c(3,4,5,6)], function(genes.list)
+{
+  genes.list[['2.5 fold']]  
+})
+deseq2_2.5 <- lapply(net.features.updated$deseq2[c(3,4,5,6)], function(genes.list)
+{
+  genes.list[['2.5 fold']]  
+})
+deseq2_3 <- lapply(net.features.updated$deseq2[c(3,4,5,6)], function(genes.list)
+{
+  genes.list[['3 fold']]  
+})
+
+
+
 train.model$deseq2_2[['shrunken']] <- build.shrunken.classifier(vst_tumor_tum, train.indexes, 
                                                                deseq2_2, stages.levels.comb)
 train.model$deseq2_2[['svm']] <- build.svm.classifier(vst_tumor_tum, train.indexes, 
@@ -163,6 +178,9 @@ cv.model$deseq2_1.5[['shrunken']] <- cv.shrunken(vst_tumor_tum, 10, deseq2_1.5,
 cv.model$deseq2_1[['shrunken']] <- cv.shrunken(vst_tumor_tum, 10, deseq2_1,
                                                train.model$deseq2_1$shrunken, train.indexes, 
                                                stages.levels.comb)
+cv.model$deseq2_2.5[['shrunken']] <- cv.shrunken(vst_tumor_tum, 10, deseq2_2.5,
+                                          train.model$deseq2_2.5$shrunken, train.indexes, 
+                                               stages.levels.comb)
 
 
 cv.model$deseq2_2[['rf']] <- cv.rf.list(vst_tumor_tum, 10, deseq2_2,
@@ -192,6 +210,24 @@ cv.model$deseq2_1[['svm']] <- cv.svm.list(vst_tumor_tum, 10, deseq2_1,
 cv.model$deseq2_1[['knn']] <- cv.knn.list(vst_tumor_tum, 10, deseq2_1,
                                           train.indexes, stages.levels.comb)
 
+cv.model$deseq2_2.5[['rf']] <- cv.rf.list(vst_tumor_tum, 10, deseq2_2.5,
+                                        train.indexes, stages.levels.comb)
+cv.model$deseq2_2.5[['nb']] <- cv.nb.list(vst_tumor_tum, 10, deseq2_2.5,
+                                        train.indexes, stages.levels.comb)
+cv.model$deseq2_2.5[['svm']] <- cv.svm.list(vst_tumor_tum, 10, deseq2_2.5,
+                                          train.indexes, stages.levels.comb)
+cv.model$deseq2_2.5[['knn']] <- cv.knn.list(vst_tumor_tum, 10, deseq2_2.5,
+                                          train.indexes, stages.levels.comb)
+
+
+cv.model$deseq2_3[['rf']] <- cv.rf.list(vst_tumor_tum, 10, deseq2_3,
+                                          train.indexes, stages.levels.comb)
+cv.model$deseq2_3[['nb']] <- cv.nb.list(vst_tumor_tum, 10, deseq2_3,
+                                          train.indexes, stages.levels.comb)
+cv.model$deseq2_3[['svm']] <- cv.svm.list(vst_tumor_tum, 10, deseq2_3,
+                                            train.indexes, stages.levels.comb)
+cv.model$deseq2_3[['knn']] <- cv.knn.list(vst_tumor_tum, 10, deseq2_3,
+                                            train.indexes, stages.levels.comb)
 
 ##########Test###############
 test.pred$deseq2_2[['shrunken']] <- predict.shrunken(train.model$deseq2_2$shrunken, 

@@ -9,10 +9,6 @@ library(varSelRF)
 library(randomForest)
 intersect(tumor.fpqm.comb.varSelRF$selected.vars,tumor.fpqm.log.comb.varSelRF$selected.vars)
 
-
-
-
-
 write.dfs.csvs <- function(folder, lists)
 {
   for(i in seq_along(lists))

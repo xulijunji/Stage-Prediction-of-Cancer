@@ -39,11 +39,16 @@ sample.df$stage <- as.factor(sample.df$stage)
 
 dds_obj <- create.Deseq2(gr.updated.train, counts(dds_tumor_reported), 
                          colData = sample.df)
-res.train.dds_obj <- do.Deseq2(dds_obj)
+res.train.dds_obj <- do.Deseq2(dds_obj_updated)
 
 net.features.updated[['deseq2']] <- list()
 net.features.updated$deseq2[['genes.object']] <- res.train.dds_obj
 net.features.updated$deseq2[['genes.list']] <- get.deseq2.genes(res.train.dds_obj, c(1,1.5,2))
+net.features.updated$deseq2$genes.list$'3 fold' <- net.features.updated$deseq2$genes.list$`3 fold`$`3 fold`
+net.features.updated$deseq2$genes.list$'2.5 fold' <- 
+  get.deseq2.genes(res.train.dds_obj, c(2.5))
+net.features.updated$deseq2$genes.list$'2.5 fold' <- net.features.updated$deseq2$genes.list$`2.5 fold`$`2.5 fold`
+
 net.features.updated$deseq2[['atleast_1']] <- sapply(net.features.updated$deseq2$genes.list, function(x)
 {
   get.genes.common(x, 1)

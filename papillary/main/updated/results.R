@@ -89,6 +89,16 @@ cv.results$deseq2_1[c('svm','rf', 'nb')] <- lapply(cv.model$deseq2_1[c('svm','rf
                                                    function(pred.cv){
                                                      get.eval.list(stages.levels.comb[train.indexes], pred.cv)
                                                    })
+
+cv.results$deseq2_2.5[c('svm','rf', 'nb')] <- lapply(cv.model$deseq2_2.5[c('svm','rf', 'nb')],
+                                                   function(pred.cv){
+                                                     get.eval.list(stages.levels.comb[train.indexes], pred.cv)
+                                                   })
+cv.results$deseq2_3[c('svm','rf', 'nb')] <- lapply(cv.model$deseq2_3[c('svm','rf', 'nb')],
+                                                     function(pred.cv){
+                                get.eval.list(stages.levels.comb[train.indexes], pred.cv)
+                                                     })
+
 #######Test#########
 test.results[['deseq2_2']] <- list()
 test.results$deseq2_2 <- lapply(test.pred$deseq2_2, function(pred.test){
@@ -120,3 +130,22 @@ perf.test$max <- lapply(test.results, function(x)
   publish.results(x, type = 'max')
 })
 perf.test$max$varSelRF <- publish.results(test.results$varSelRF, indexes = c(1,2,3), type = 'max')
+
+write.dfs.csvs('results/tumor/test/mean/', perf.test$mean)
+write.dfs.csvs('results/tumor/test/max/', perf.test$max)
+
+perf.cv <- list()
+perf.cv$mean <- lapply(cv.results, function(x)
+{
+  publish.results(x, type = 'mean')
+})
+perf.cv$mean$varSelRF <- publish.results(cv.results$varSelRF, indexes = c(1,2,3))
+
+perf.cv$max <- lapply(cv.results, function(x)
+{
+  publish.results(x, type = 'max')
+})
+write.dfs.csvs('results/tumor/CV/mean/', perf.cv$mean)
+write.dfs.csvs('results/tumor/CV/max/', perf.cv$max)
+
+  
