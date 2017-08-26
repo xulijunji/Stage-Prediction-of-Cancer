@@ -40,9 +40,30 @@ venn.diagram(create.list.venn(net.features.updated, 2, 4), filename = 'images/tu
 
 ####HeatMaps
 library(RColorBrewer)
-col <- brewer.pal(9, 'PuRd')
-create.heatmap(vst_tumor_tum, stages.levels.comb, net.features.updated$deseq2$atleast_4$`2 fold`, 
-               '2 fold', col = col)
+library(pheatmap)
+col <- colorRampPalette(rev(brewer.pal(9, 'RdYlBu')))(100)
+df.tumor <- create.ordered.annotation(stages.levels.comb[],
+                                      rownames(vst_tumor_tum[,]))
+breaks = c(seq(5,10, length.out = 70), seq(10.1,24, length.out = 30))
+
+genes = net.features.updated$deseq2$atleast_1$`1 fold`
+g.int = intersect(net.features.updated$deseq2$atleast_2$`1 fold`,
+      intersect(net.features.updated$shrunken$atleast_2, net.features.updated$varSelRF$atleast_2))
+data = vst_tumor_tum[train.indexes,late.stage.genes]
+data = vst_tumor_tum[,wcgna.genes.ent.ens]
+clus_rows = run_hclust_on_a_matrix(data)
+clus_cols = run_hclust_on_a_matrix(t(data))
+pheatmap(t(data),
+#         annotation_col = df.tumor, 
+#         cluster_rows = clus_rows,
+#         cluster_cols = clus_cols,
+          cluster_cols = T,
+          breaks = breaks,
+#          main = 'Heatmap using intersection for atleast 2 and 1 fold',
+         show_rownames = F, show_colnames = F)
+
+create.heatmap(vst_tumor_tum, stages.levels.comb, g, 't',
+               col = col)
 create.heatmap(vst_tumor_tum, stages.levels.comb, g, 
                '2 fold', col = col)
 
@@ -94,6 +115,8 @@ g_2_1 <- intersect(intersect(net.features.updated$shrunken$atleast_1, net.featur
                    net.features.updated$deseq2$atleast_1$`2 fold`)
 g_2_2 <- intersect(intersect(net.features.updated$shrunken$atleast_2, net.features.updated$varSelRF$atleast_2),
                    net.features.updated$deseq2$atleast_2$`2 fold`)
+g_2_3 <- intersect(intersect(net.features.updated$shrunken$atleast_3, net.features.updated$varSelRF$atleast_3),
+                   net.features.updated$deseq2$atleast_3$`2 fold`)
 
 a <- final.res(vst_tumor_tum, train.indexes, test.indexes, stages.levels.comb, g, 10)
 res_1.5_3 <- final.res(vst_tumor_tum, train.indexes, test.indexes, stages.levels.comb, g_1.5_3, 10)
@@ -108,3 +131,110 @@ res_2_1 <- final.res(vst_tumor_tum, train.indexes, test.indexes, stages.levels.c
 res_2_2 <- final.res(vst_tumor_tum, train.indexes, test.indexes, stages.levels.comb, g_2_2, 10)
 
 get.conf.mat(a[[2]])
+
+
+
+###First finding the intersection between the degs b/w normal and tumor and b/w stages
+length(g_1_1)
+length(intersect(diff.genes$`1`, g_1_1))
+length(intersect(diff.genes$`2`, g_1_1))
+
+length(g_1_2)
+length(intersect(diff.genes$`1`, g_1_2))
+length(intersect(diff.genes$`2`, g_1_2))
+
+length(g_1.5_1)
+length(intersect(diff.genes$`1`, g_1.5_1))
+length(intersect(diff.genes$`2`, g_1.5_1))
+
+early.stage.genes <- intersect(diff.genes$`1`, g_1.5_1)
+late.stage.genes <- setdiff(g_1.5_1, intersect(diff.genes$`1`, g_1.5_1))
+
+col <- colorRampPalette(rev(brewer.pal(9, 'RdYlBu')))(100)
+df.nor.tumor <- create.ordered.annotation(sample.info.all.rep$comb.stage,
+                                      rownames(vs_normal_comb_reported))
+sample.info.all.rep$comb.stage <- as.factor(sapply(sample.info.all.rep$stage.type, function(stage)
+  {
+  if(stage == 'stage i' | stage == 'stage ii')
+    'early'
+  else if(stage == 'stage iii' | stage == 'stage iv')
+    'late'
+  else
+    'N'
+}))
+breaks = c(seq(5,10, length.out = 70), seq(10.1,24, length.out = 30))
+data = vs_normal_comb_reported[,late.stage.genes]
+clus_rows = run_hclust_on_a_matrix(data)
+clus_cols = run_hclust_on_a_matrix(t(data))
+pheatmap(t(data),
+         annotation_col = df.nor.tumor, 
+         #cluster_rows = clus_rows,
+         #         cluster_cols = clus_cols,
+         breaks = breaks,
+         #          main = 'Heatmap using intersection for atleast 2 and 1 fold',
+         show_rownames = F, show_colnames = F)
+
+
+
+length(intersect(intersect(diff.genes$`1`, g_1_2) , intersect(diff.genes$`1`, g_1.5_1)))
+
+r <- final.res(vst_tumor_tum, train.indexes, test.indexes, stages.levels.comb, 
+          g_1_2, 10)
+get.aucs(r[[2]])
+
+####WGCNA#######
+####Hub Genes
+wcgna.genes.ent <- c(22974, 6241, 11065, 990, 699, 10112, 9232, 55165, 9212,
+                     55355, 259266, 146909, 64151, 4751, 24137, 890, 55388)
+wcgna.genes.ent.ens <- 	c('ENSG00000112984', 'ENSG00000175063',	'ENSG00000186185',
+                          'ENSG00000088325', 'ENSG00000090889', 'ENSG00000066279', 
+                          'ENSG00000117650', 'ENSG00000138180',	'ENSG00000123485',	
+                          'ENSG00000065328', 'ENSG00000171848', 'ENSG00000109805', 
+                          'ENSG00000169679', 'ENSG00000145386',	'ENSG00000178999',
+                          'ENSG00000164611', 'ENSG00000094804')
+  
+intersect(g_2_1, wcgna.genes.ent.ens)
+intersect(net.features.updated$deseq2$atleast_1$`2 fold`, wcgna.genes.ent.ens)
+res.wcgna <- final.res(vst_tumor_tum, train.indexes, test.indexes, stages.levels.comb, wcgna.genes.ent.ens, 
+                       10)
+g = intersect(net.features.updated$shrunken$atleast_1, diff.genes$`2`)
+res.g <- final.res(vst_tumor_tum, train.indexes, test.indexes, stages.levels.comb, g, 
+                   10)
+
+get.aucs(res.wcgna[[1]])
+get.aucs(res.wcgna[[2]])
+get.aucs(res_1_2[[1]])
+get.aucs(res_1_2[[2]])
+get.aucs(res_1_1[[2]])
+get.aucs(res_2_2[[2]])
+get.aucs(res_2_1[[1]])
+get.aucs(res_1.5_1[[1]])
+get.aucs(res_1.5_2[[2]])
+get.aucs(res_1.5_3[[2]])
+get.aucs(res_1_3[[2]])
+get.aucs(res.g[[2]])
+intersect(g_1_1, wcgna.genes.ent.ens)
+
+library(ggplot2)
+
+create.boxplots <- function(gene, data, stage)
+{
+  boxplots <- list()
+  for(i in seq_along(gene))
+  {
+    box.df <- data.frame(gene = data[,gene[i]], stage = stage)
+    g <- ggplot(box.df, aes(x = stage, y = gene))+geom_boxplot()+
+      ggtitle(gene[i])
+    boxplots[[i]] <- g
+  }
+  return(boxplots)
+}
+boxplots.g_2_2 <- create.boxplots(g_2_2, vs_normal_comb_reported, sample.info.all.rep$stage.type)
+multiplot(boxplots.g_2_2, col = 3)
+
+boxplots.wcgna <- create.boxplots(wcgna.genes.ent.ens, vs_normal_comb_reported, sample.info.all.rep$stage.type)
+multiplot(boxplots.wcgna, col = 4)
+
+boxplot.g_1.5_1 <- create.boxplots(g_1.5_1[55], vs_normal_comb_reported, 
+                                   sample.info.all.rep$stage.type)
+multiplot(boxplot.g_1.5_1, col = 1)

@@ -298,4 +298,29 @@ final.res <- function(data, train.ind, test.ind, stages.levels, genes, folds, pc
 return(list(res.cv, res.test))
 }
 
+get.sam.features <- function(gr, data, stages)
+{
+  source('sam/sam_func_cop.R')
+  source('sam/samr.morefuns.R')
+  
+  stages = as.factor(stages)
+  y.req = c()
+  res.sam <- list()
+  for(stage in stages)
+  {
+    if(stage == levels(stages)[1])    
+      y.req = c(y.req, 1)
+    else
+      y.req = c(y.req, 2)
+  }
+  for(i in seq_along(gr))
+  {
+    train.ind <- unlist(gr[-i])
+    data[,train.ind] <- data[-which(rowSums(assay(dds)) < 2),train.ind]  
+    res.sam[[i]] <- SAMseq(x=data[, train.ind], y = y.req[train.ind], resp.type = 'Two class unpaired' )
+    paste(i,'completed')
+  }
+  return(res.sam)
+}
 
+res.sam <- get.sam.features(gr.trial.train, assay(dds_tumor_reported), stages.levels.comb)

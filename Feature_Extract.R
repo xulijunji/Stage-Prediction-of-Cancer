@@ -16,7 +16,7 @@ get.mRNA_files = function(mRNA_files_path, total_case_files)
     print('sucker')
 }
 
-get.json.mapping <- function(path,file_name)
+get.json.mapping <- function(path,file_name,total_case_files)
 {
   ##path - path of the folder containing the cart json file
   ##file_name - the json file that contains the meta information
@@ -27,12 +27,12 @@ get.json.mapping <- function(path,file_name)
   json_data <- fromJSON(file = file_name) 
   pat.ids <- sapply(seq(length(json_data)), function(x)
   {
-    unlist(json_data[[x]][[14]])[3] ##14 column corrseponds to associated entities which contain patient id
+    unlist(json_data[[x]][[12]])[3] ##14 column corrseponds to associated entities which contain patient id
   })
   length(unique(pat.ids))
   file.ids <- sapply(seq(length(json_data)), function(x)
   {
-    substr(json_data[[x]][4],1, nchar(json_data[[2]][4])-3)})
+    substr(json_data[[x]][[2]],1, nchar(json_data[[x]][2])-3)})
   length(unique(file.ids)) == total_case_files
   
   sample.file.map = data.frame(pat.ids = pat.ids, file.ids = file.ids)
@@ -84,6 +84,7 @@ get.genes.files <- function(mRNA_files, mRNA_files_path, proj_dir)
   setwd(mRNA_files_path)
   file1 = read.delim(mRNA_files[1], header = F)
   ens.ids.all = sort(as.character(file1$V1)) ##all ensembl ids including transcript
+  ens.ids.all = ens.ids.all[startsWith(ens.ids.all, 'ENSG0')]
   setwd(proj_dir)
   return(ens.ids.all)
 }
@@ -104,7 +105,7 @@ remove.dots <- function(ens.ids.all)
 
 ##For removing ids that are greater that are not entrez ids
 
-get.entrez <- function(g)
+get.entrez <- function(g, mart)
 {
   #g - ens ids without dots
   
@@ -191,11 +192,12 @@ get.count.matrix <- function(ens.ids.all, indexes.ens, mRNA_files, sample.file.m
   ##sample.file.map - gets the mapping from file id to patient id returned from get.json.mapping
   ##mRNA_files_path <- Path of the folder containing mRNA_files
   ##proj_dir <- The directory of my R project
-  
-  
   setwd(mRNA_files_path)
+  
   file1 = read.delim(mRNA_files[1], header = F)
+  
   file1 = file1[order(file1$V1),]
+  file1 = file1[match(ens.ids.all, file1$V1),]
   ens.ids = ens.ids.all[indexes.ens] ##All ens ids which have gene transcripts
   ens.ids = sort(ens.ids)
   exp_prof = file1$V2[indexes.ens]
@@ -204,6 +206,10 @@ get.count.matrix <- function(ens.ids.all, indexes.ens, mRNA_files, sample.file.m
   file = read.delim(mRNA_files[i], header = F)
   file = file[order(file$V1),]
   ids = as.character(file$V1)
+  ids = ids[startsWith(ids, 'ENSG0')]
+  file = file[match(ids, file$V1),]
+  print(length(ids))
+  #print(head(ids))
     if(sum(is.na(match(ids, ens.ids.all))) != 0 | length(ids)!=length(ens.ids.all))
   {
     print('bhag')

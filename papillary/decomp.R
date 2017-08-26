@@ -219,6 +219,21 @@ get.intersect.genes <- function(genes.list, indexes)
   return(Reduce(intersect, genes.list[indexes]))
 }
 
+create.ordered.annotation <- function(stages, names)
+{
+  stage.ind.levels <- list()
+  for(i in seq_along(levels(stages)))
+  {
+    stage = levels(stages)[i]
+    stage.ind.levels[[stage]] = which(stages == stage)
+  }
+  row.indexes <- Reduce(union, stage.ind.levels)
+  annotation = NULL
+  annotation = data.frame(stage = stages[row.indexes])
+  rownames(annotation) = names[row.indexes]
+  return(annotation)
+}
+
 create.heatmap <- function(data, stages, genes, title, col = NULL, labs = NULL,
                            show_colnames = F, show_rownames = F,
                            cluster_cols = F, cluster_rows = F,
@@ -592,3 +607,9 @@ get.clust.score <- function(data, genes, stages, classes)
   clust <- kmeans(data[,genes], classes)
   return(adjustedRandIndex(clust$cluster, stages))
 }
+
+run_hclust_on_a_matrix <- function(x, cor.method = "spearman", hclust.method = "ward.D2")
+{
+  return(stats::hclust(as.dist(1 - cor(x, method = cor.method)), method = hclust.method))
+}
+

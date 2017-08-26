@@ -1,8 +1,10 @@
 source('main/updated/initialisation.R')
 source('../function.R')
 load('environment/sample_info.RData')
+load('environment/exp_prof.RData')
 load('environment/dds.RData')
 load('environment/accuracy_feature/vs_nor_comb.RData')
+load('environment/sample_info_tumor_rep_normal.RData')
 library(RColorBrewer)
 library(ggplot2)
 
@@ -15,10 +17,26 @@ plotPCA(t(vst_tumor_tum[,diff.genes$`5`]), intgroup = 'stage.type', title = '5 f
 plotPCA(t(vst_tumor_tum[,net.features.updated$varSelRF$atleast_2]), intgroup = 'stage.type', title = '5 fold genes', 
         colData = data.frame(stage.type=stages.levels.comb))
 
-col <- brewer.pal(9, 'PuRd')
-create.heatmap(vs_normal_comb_reported, sample.info.all.rep$stage.type, diff.genes$`5`, 
-               'Heatmap using 5 fold genes', col = col, 
-               cluster_rows = T, cluster_cols = T)
+col <- colorRampPalette(rev(brewer.pal(9, 'RdYlBu')))(100)
+
+breaks = c(seq(5,7, length.out = 40), seq(7.1,24, length.out = 60))
+df = data.frame(type = sample.info.all.rep$stage.type)
+rownames(df) = rownames(vs_normal_comb_reported)
+
+
+train.indexes
+pheatmap(t(vs_normal_comb_reported[,g_1_1]), 
+                col = col,
+         annotation_col = create.ordered.annotation(sample.info.all.rep$stage.type,
+                                                  rownames(vs_normal_comb_reported)),                
+#         cluster_rows = a,
+#         cluster_cols = b,
+           breaks = breaks,
+          show_colnames = F, show_rownames = F
+               )
+a=run_hclust_on_a_matrix(vs_normal_comb_reported[,diff.genes$`2`])
+b=run_hclust_on_a_matrix(t(vs_normal_comb_reported[,diff.genes$`2`]))
+
 create.heatmap(t(counts(dds_tumor_reported)), stages.levels.comb, colnames(vst_tumor_tum), 
                'Heatmap using 1 fold genes', col = col, 
                cluster_rows = T, cluster_cols = F)
