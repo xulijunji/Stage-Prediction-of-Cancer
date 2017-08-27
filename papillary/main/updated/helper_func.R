@@ -80,7 +80,7 @@ build.shrunken.classifier <- function(data, train.ind, genes.list, stages.levels
 {
   shrunken.train.list <- lapply(genes.list, function(genes)
     {
-    pamr.train(data = list(x = as.matrix(t(data[train.indexes, genes])), y = stages.levels[train.ind]))
+    pamr.train(data = list(x = as.matrix(t(data[train.ind, genes])), y = stages.levels[train.ind]))
   })
   names(shrunken.train.list) <- names(genes.list)
   return(shrunken.train.list)
@@ -323,4 +323,4 @@ get.sam.features <- function(gr, data, stages)
   return(res.sam)
 }
 
-res.sam <- get.sam.features(gr.trial.train, assay(dds_tumor_reported), stages.levels.comb)
+#res.sam <- get.sam.features(gr.trial.train, assay(dds_tumor_reported), stages.levels.comb)

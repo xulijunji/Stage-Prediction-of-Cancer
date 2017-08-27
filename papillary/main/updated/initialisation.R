@@ -1,6 +1,3 @@
-source('decomp.R')
-source('main/updated/helper_func.R')
-source('main/final.R')
 #library(pamr)
 
 load('environment/stages.level.comb.RData')
@@ -11,6 +8,10 @@ load('environment/accuracy_feature/tumor_ind_vs.RData')
 load('environment/accuracy_feature/updated/gr.RData')
 load('environment/accuracy_feature/updated/net_features_updated.RData')
 load('environment/accuracy_feature/updated/gr_trial.RData')
+
+source('decomp.R')
+source('main/updated/helper_func.R')
+source('main/final.R')
 
 vst_tumor_tum <- vs_normal_comb_reported[tumor.ind.vs, ]
 remove(vs_normal_comb_reported)

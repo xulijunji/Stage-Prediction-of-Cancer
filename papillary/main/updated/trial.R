@@ -50,3 +50,10 @@ trial.res.or.fe <- lapply(deseq.features$`2 fold`, function(genes)
 trial.res.new.feat <- lapply(deseq.or.features$`2 fold`, function(genes)
 {final.res(vst_tumor_tum, train.trial.ind, test.trial.ind, 
            stages.levels.comb, genes, 10)})
+
+b <- create.net.df(test.results)
+b.cv <- create.net.df(cv.results)
+
+library(ggplot2)
+ggplot(b, aes(x=Classifier, y=AUC, fill=Feature_Selection)) +
+  geom_boxplot()
