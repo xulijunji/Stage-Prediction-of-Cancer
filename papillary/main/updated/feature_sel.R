@@ -68,6 +68,36 @@ get.features <- function(data, stages, train.ind, file_save)
     get.genes.common(x, 4)
   })
   print('Finished DESeq2')
+  
+  ####SAMSeq
+  res.sam <- get.sam.features(train.ind, assay(dds_tumor_reported), stages)
+  sam.genes <- lapply(res.sam, function(sam.obj)
+  {
+    a <- rbind(sam.obj$siggenes.table$genes.up, sam.obj$siggenes.table$genes.lo)
+    data.frame(GeneID = as.character(a[,1]), Gene.Name = as.character(a[,2]), Score = as.numeric(a[,3]), 
+               Fold.Change = as.numeric(a[,4]), q.val = as.numeric(a[,5]), stringsAsFactors = F)
+    
+  })
+  net.features[['sam']] <- list()
+  net.features$sam[['sam.obj']] <- res.sam
+  net.features$sam[['genes.list']] <- get.sam.genes(sam.genes, c(1, 1.5, 2))
+  net.features$sam[['atleast_1']] <- sapply(net.features$sam$genes.list, function(genes.list)
+    {
+    get.genes.common(genes.list, 1)
+  })
+  net.features$sam[['atleast_2']] <- sapply(net.features$sam$genes.list, function(genes.list)
+  {
+    get.genes.common(genes.list, 2)
+  })
+  net.features$sam[['atleast_3']] <- sapply(net.features$sam$genes.list, function(genes.list)
+  {
+    get.genes.common(genes.list, 3)
+  })
+  net.features$sam[['atleast_4']] <- sapply(net.features$sam$genes.list, function(genes.list)
+  {
+    get.genes.common(genes.list, 4)
+  })
+  
 #  save(net.features, file = file_save)
   return(net.features)
 }
@@ -75,6 +105,4 @@ net.features.updated <- get.features(vst_tumor_tum, stages.levels.comb, gr.updat
                                      'environment/accuracy_feature/updated/net_features_updated.RData')
 net.features.trial <- get.features(vst_tumor_tum, stages.levels.comb, gr.trial.train, 
                                      'environment/accuracy_feature/updated/net_features_trial.RData')
-
-
 

@@ -300,6 +300,7 @@ return(list(res.cv, res.test))
 
 get.sam.features <- function(gr, data, stages)
 {
+  library(samr)
   source('sam/sam_func_cop.R')
   source('sam/samr.morefuns.R')
   
@@ -316,11 +317,31 @@ get.sam.features <- function(gr, data, stages)
   for(i in seq_along(gr))
   {
     train.ind <- unlist(gr[-i])
-    data[,train.ind] <- data[-which(rowSums(assay(dds)) < 2),train.ind]  
-    res.sam[[i]] <- SAMseq(x=data[, train.ind], y = y.req[train.ind], resp.type = 'Two class unpaired' )
+    req.data <- data[, train.ind]
+    print(nrow(req.data))
+    print(ncol(req.data))
+    req.data <- req.data[-which(rowSums(req.data) < 2),]  
+    print(ncol(req.data))
+    print(nrow(req.data))
+    res.sam[[i]] <- SAMseq(x=req.data, y = y.req[train.ind], resp.type = 'Two class unpaired', 
+                           genenames = rownames(req.data))
     paste(i,'completed')
   }
   return(res.sam)
 }
 
-#res.sam <- get.sam.features(gr.trial.train, assay(dds_tumor_reported), stages.levels.comb)
+get.sam.genes <- function(sam.genes, folds)
+{
+  req.genes <- lapply(folds, function(fold)
+    {
+      genes <- list()
+      for(i in seq_along(sam.genes))
+      {
+        genes[[i]] <- sam.genes[[i]]$GeneID[which(abs(log2(sam.genes[[i]]$Fold.Change)) > fold & 
+                                      sam.genes[[i]]$q.val < 0.05)]
+      }
+      genes
+  })
+  names(req.genes) <- paste0(folds, ' fold')
+  return(req.genes)
+}
