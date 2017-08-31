@@ -105,13 +105,13 @@ remove.dots <- function(ens.ids.all)
 
 ##For removing ids that are greater that are not entrez ids
 
-get.entrez <- function(g, mart)
+get.entrez <- function(g)
 {
   #g - ens ids without dots
   
   ##returns the entez ids corresponding to ens.ids(removing dots)
   ##Note that not all ens.ids will contain entrez ids since the ens.ids could belong to non coding regions
-  
+  library(biomaRt)
   ensembl=useMart("ensembl")
   #listDatasets(ensembl)
   ensembl=useDataset("hsapiens_gene_ensembl",mart=ensembl)
