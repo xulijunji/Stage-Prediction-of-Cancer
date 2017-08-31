@@ -10,9 +10,9 @@ micr_df <- micr_df[,-35]
 micr_df <- t(micr_df)
 micr_genes <- colnames(micr_df)
 
-g_micr <- intersect(net.features.updated$shrunken$atleast_1, micr_genes)
+g_micr <- intersect(net.features.updated$varSelRF$atleast_4, micr_genes)
 g_micr <- intersect(g_micr, micr_genes)
-res_micr <- final.res(micr_df, train.ind = c(1:34), test.ind = c(1:34), as.factor(sample_micro_info$class), 
+res_micr <- final.res(micr_df, train.ind = c(1:34), test.ind = c(1:34), as.factor(sample_micro_info$stage), 
                       g_micr, 10)
 
 res.micr.class <- lapply(list(net.features.updated$shrunken[c(3,4,5,6)],

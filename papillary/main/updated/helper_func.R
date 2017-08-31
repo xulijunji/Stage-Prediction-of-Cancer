@@ -228,6 +228,8 @@ get.eval.list <- function(actual.stages, predict.list)
     {
     get.eval(actual.stages, predicted)
   })
+  print(eval.list)
+  return(eval.list)
 }
 get.eval <- function(actual.stages, pred.stages)
 {
@@ -270,6 +272,7 @@ final.res <- function(data, train.ind, test.ind, stages.levels, genes, folds, pc
   pred.test.class <- list()
   pred.test.class[['shrunken']] <- pamr.predict(train.list$shrunken, t(as.matrix(test.data)),
                                     threshold = train.list$shrunken$threshold[pred.cv.list$shrunken$thr])
+  print(table(pred.test.class[['shrunken']]))
   pred.test.class[['svm']] <- predict(train.list$svm, test.data)
   pred.test.class[['rf']] <- predict(train.list$rf, test.data)
   pred.test.class[['nb']] <- predict(train.list$nb, test.data)

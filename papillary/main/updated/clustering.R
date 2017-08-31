@@ -19,22 +19,35 @@ for(stage in sample.info.all.rep$stage.type)
   else
     stage.com.norm <- c(stage.com.norm, 'late')
 }
-sample.info.all.rep$stage.comb <- stage.com.norm
+sample.info.all.rep$stage.comb.norm <- as.factor(stage.com.norm)
   
 col <- colorRampPalette(rev(brewer.pal(9, 'RdYlBu')))(100)
 vst_tumor_tum <- vs_normal_comb_reported[tumor.ind.vs, ]
 
-genes.clus <- net.features.trial$shrunken$atleast_3
+genes.clus <- net.features.trial$deseq2$atleast_4$`2 fold`
 data.clus <- vs_normal_comb_reported[ , genes.clus]
 breaks = c(seq(5,7, length.out = 40), seq(7.1,24, length.out = 60))
 
 clus_rows = run_hclust_on_a_matrix(data.clus)
 clus_cols = run_hclust_on_a_matrix(t(data.clus))
 pheatmap(t(data.clus),
-         annotation_col = create.ordered.annotation(sample.info.all.rep$stage.type,
+         annotation_col = create.ordered.annotation(sample.info.all.rep$stage.comb.norm,
                                                     rownames(data.clus)),
 #                 cluster_rows = clus_rows,
          #         cluster_cols = clus_cols,
          breaks = breaks,
          #          main = 'Heatmap using intersection for atleast 2 and 1 fold',
          show_rownames = F, show_colnames = F)
+
+##On originial data
+genes.orig <- net.features.updated$deseq2$atleast_4$`2 fold`
+data.orig <- vst_tumor_tum[test.trial.ind,genes.orig]
+pheatmap(t(data.orig),
+         annotation_col = create.ordered.annotation(stages.levels.comb[test.trial.ind],
+                                                    rownames(data.orig)),
+         #                 cluster_rows = clus_rows,
+         #         cluster_cols = clus_cols,
+         breaks = breaks,
+         #          main = 'Heatmap using intersection for atleast 2 and 1 fold',
+         show_rownames = F, show_colnames = F)
+

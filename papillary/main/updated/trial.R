@@ -57,3 +57,6 @@ b.cv <- create.net.df(cv.results)
 library(ggplot2)
 ggplot(b, aes(x=Classifier, y=AUC, fill=Feature_Selection)) +
   geom_boxplot()
+
+micr.class <- final.res(t(merged_final[,1:34]), c(1:34), c(1:34), sample_micro_info$stage, 
+                        net.features.trial$varSelRF$atleast_4, 10)
