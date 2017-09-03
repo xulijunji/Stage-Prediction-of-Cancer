@@ -350,3 +350,4 @@ get.sam.genes <- function(sam.genes, folds)
   names(req.genes) <- paste0(folds, ' fold')
   return(req.genes)
 }
+

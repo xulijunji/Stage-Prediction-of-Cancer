@@ -120,10 +120,40 @@ get.features <- function(data, stages, train.ind.list)
   net.features[['deseq2']] <- get.feature.deseq2(dds_tumor_reported, stages, train.ind.list)
   
   ####SAMSeq
-  net.features[['sam']] <- get.features.sam(t(data), stages, train.ind.list)
+  net.features[['sam']] <- get.features.sam(assay(dds_tumor_reported), stages, train.ind.list)
   
   return(net.features)
 }
 net.features.updated <- get.features(vst_tumor_tum, stages.levels.comb, gr.updated.train)
 net.features.trial <- get.features(vst_tumor_tum, stages.levels.comb, gr.trial.train)
-net.features.trial$sam <- get.features.sam(assay(dds_tumor_reported), stages.levels.comb, gr.updated.train)
+
+
+get.filter.fea <- function(features.list, folds.list)
+{
+  filter.fea <- list()
+  for(i in seq_along(folds.list))
+  {
+    filter.fea[[folds.list[i]]] <- lapply(features.list, function(genes.list)
+    {
+      genes.list[[folds.list[i]]]  
+    })
+  }
+  return(filter.fea)
+}
+get.class.fea <- function(net.fea)
+{
+  fea.list <- list()
+  for(i in seq_along(net.fea))
+  {
+    fea.name <- names(net.fea)[i]
+    if(fea.name %in% c('shrunken','varSelRF'))
+      fea.list[[fea.name]] <- net.fea[[fea.name]][c(3,4,5,6)]
+    else
+    {
+      temp.fea <- get.filter.fea(net.fea[[fea.name]][c(3,4,5,6)], paste0(c(1,1.5,2), ' fold'))
+      for(j in seq_along(de))
+        fea.list[[paste0(fea.name, names(de)[j])]] <- temp.fea[[names(de)[j]]]
+    }
+  }
+  return(fea.list)
+}
