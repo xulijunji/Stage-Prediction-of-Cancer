@@ -137,10 +137,7 @@ deseq2_2.5 <- lapply(net.features.updated$deseq2[c(3,4,5,6)], function(genes.lis
 {
   genes.list[['2.5 fold']]  
 })
-deseq2_2.5 <- lapply(net.features.updated$deseq2[c(3,4,5,6)], function(genes.list)
-{
-  genes.list[['2.5 fold']]  
-})
+
 deseq2_3 <- lapply(net.features.updated$deseq2[c(3,4,5,6)], function(genes.list)
 {
   genes.list[['3 fold']]  
@@ -285,6 +282,86 @@ test.pred$deseq2_1[['nb']] <- predict.model(train.model$deseq2_1$nb,
 test.pred$deseq2_1[['knn']] <- predict.knn(cv.model$deseq2_1$knn, 
                                            deseq2_1, vst_tumor_tum[tr.ind,],
                                            vst_tumor_tum[te.ind, ], stages.levels.comb[tr.ind])
-save(cv.model, file = 'environment/accuracy_feature/updated/cv_model.RData')
-save(test.pred, file = 'environment/accuracy_feature/updated/test_pred.RData')
-save(train.model, file = 'environment/accuracy_feature/updated/train_model.RData')
+
+#####SAM Features###########
+sam.fea <- list()
+sam.fea[['2 fold']] <- lapply(net.fea$sam[c(3,4,5,6)], function(genes.list)
+{
+  genes.list[['2 fold']]  
+})
+sam.fea[['1.5 fold']] <- lapply(net.fea$sam[c(3,4,5,6)], function(genes.list)
+{
+  genes.list[['1.5 fold']]  
+})
+sam.fea[['1 fold']]  <- lapply(net.fea$sam[c(3,4,5,6)], function(genes.list)
+{
+  genes.list[['1 fold']]  
+})
+
+train.model$sam_2[['shrunken']] <- build.shrunken.classifier(vst_tumor_tum, tr.ind, 
+                                                                sam.fea$`2 fold`, stages.levels.comb)
+train.model$sam_2[['svm']] <- build.svm.classifier(vst_tumor_tum, tr.ind, 
+                                                   sam.fea$`2 fold`, stages.levels.comb)
+train.model$sam_2[['nb']] <- build.nb.classifier(vst_tumor_tum, tr.ind, 
+                                                 sam.fea$`2 fold`, stages.levels.comb)
+train.model$sam_2[['rf']] <- build.rf.classifier(vst_tumor_tum, tr.ind, 
+                                                 sam.fea$`2 fold`, stages.levels.comb)
+train.model$sam_1.5[['shrunken']] <- build.shrunken.classifier(vst_tumor_tum, tr.ind, 
+                                                               sam.fea$`1.5 fold`, stages.levels.comb)
+train.model$sam_1.5[['svm']] <- build.svm.classifier(vst_tumor_tum, tr.ind, 
+                                                     sam.fea$`1.5 fold`, stages.levels.comb)
+train.model$sam_1.5[['nb']] <- build.nb.classifier(vst_tumor_tum, tr.ind, 
+                                                   sam.fea$`1.5 fold`, stages.levels.comb)
+train.model$sam_1.5[['rf']] <- build.rf.classifier(vst_tumor_tum, tr.ind, 
+                                                   sam.fea$`1.5 fold`, stages.levels.comb)
+train.model$sam_1[['shrunken']] <- build.shrunken.classifier(vst_tumor_tum, tr.ind, 
+                                                             sam.fea$`1 fold`, stages.levels.comb)
+train.model$sam_1[['svm']] <- build.svm.classifier(vst_tumor_tum, tr.ind, 
+                                                   sam.fea$`1 fold`, stages.levels.comb)
+train.model$sam_1[['nb']] <- build.nb.classifier(vst_tumor_tum, tr.ind, 
+                                                 sam.fea$`1 fold`, stages.levels.comb)
+train.model$sam_1[['rf']] <- build.rf.classifier(vst_tumor_tum, tr.ind, 
+                                                    sam.fea$`1 fold`, stages.levels.comb)
+
+##########CV###################
+cv.model$sam_2[['shrunken']] <- cv.shrunken(vst_tumor_tum, 10, deseq2_2,
+                                               train.model$deseq2_2$shrunken, tr.ind, 
+                                               stages.levels.comb)
+cv.model$sam_1.5[['shrunken']] <- cv.shrunken(vst_tumor_tum, 10, deseq2_1.5,
+                                                 train.model$deseq2_1.5$shrunken, tr.ind, 
+                                                 stages.levels.comb)
+cv.model$sam_1[['shrunken']] <- cv.shrunken(vst_tumor_tum, 10, deseq2_1,
+                                               train.model$deseq2_1$shrunken, tr.ind, 
+                                               stages.levels.comb)
+
+cv.model$deseq2_2[['rf']] <- cv.rf.list(vst_tumor_tum, 10, deseq2_2,
+                                        tr.ind, stages.levels.comb)
+cv.model$deseq2_2[['nb']] <- cv.nb.list(vst_tumor_tum, 10, deseq2_2,
+                                        tr.ind, stages.levels.comb)
+cv.model$deseq2_2[['svm']] <- cv.svm.list(vst_tumor_tum, 10, deseq2_2,
+                                          tr.ind, stages.levels.comb)
+cv.model$deseq2_2[['knn']] <- cv.knn.list(vst_tumor_tum, 10, deseq2_2,
+                                          tr.ind, stages.levels.comb)
+
+cv.model$deseq2_1.5[['rf']] <- cv.rf.list(vst_tumor_tum, 10, deseq2_1.5,
+                                          tr.ind, stages.levels.comb)
+cv.model$deseq2_1.5[['nb']] <- cv.nb.list(vst_tumor_tum, 10, deseq2_1.5,
+                                          tr.ind, stages.levels.comb)
+cv.model$deseq2_1.5[['svm']] <- cv.svm.list(vst_tumor_tum, 10, deseq2_1.5,
+                                            tr.ind, stages.levels.comb)
+cv.model$deseq2_1.5[['knn']] <- cv.knn.list(vst_tumor_tum, 10, deseq2_1.5,
+                                            tr.ind, stages.levels.comb)
+
+cv.model$deseq2_1[['rf']] <- cv.rf.list(vst_tumor_tum, 10, deseq2_1,
+                                        tr.ind, stages.levels.comb)
+cv.model$deseq2_1[['nb']] <- cv.nb.list(vst_tumor_tum, 10, deseq2_1,
+                                        tr.ind, stages.levels.comb)
+cv.model$deseq2_1[['svm']] <- cv.svm.list(vst_tumor_tum, 10, deseq2_1,
+                                          tr.ind, stages.levels.comb)
+cv.model$deseq2_1[['knn']] <- cv.knn.list(vst_tumor_tum, 10, deseq2_1,
+                                          tr.ind, stages.levels.comb)
+
+
+save(cv.model, file = 'environment/accuracy_feature/updated/new_data/cv_model.RData')
+save(test.pred, file = 'environment/accuracy_feature/updated/new_data/test_pred.RData')
+save(train.model, file = 'environment/accuracy_feature/updated/new_data/train_model.RData')

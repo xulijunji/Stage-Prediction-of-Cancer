@@ -323,7 +323,9 @@ get.sam.features <- function(gr, data, stages)
     req.data <- data[, train.ind]
     print(nrow(req.data))
     print(ncol(req.data))
-    req.data <- req.data[-which(rowSums(req.data) < 2),]  
+    ind.to.rem <- which(rowSums(req.data) < 2)
+    if(length(ind.to.rem) > 0)
+      req.data <- req.data[-ind.to.rem,]  
     print(ncol(req.data))
     print(nrow(req.data))
     res.sam[[i]] <- SAMseq(x=req.data, y = y.req[train.ind], resp.type = 'Two class unpaired', 
