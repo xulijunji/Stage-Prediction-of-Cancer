@@ -228,7 +228,6 @@ get.eval.list <- function(actual.stages, predict.list)
     {
     get.eval(actual.stages, predicted)
   })
-  print(eval.list)
   return(eval.list)
 }
 get.eval <- function(actual.stages, pred.stages)

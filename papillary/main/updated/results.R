@@ -5,120 +5,45 @@ load('environment/accuracy_feature/updated/test_pred.RData')
 cv.results <- list()
 test.results <- list()
 
-##############Shrunken feature#################
-########CV########
-
-tr.ind <- train.trial.ind
-te.ind <- test.trial.ind
-cv.results[['shrunken']] <- list()
-
-cv.results$shrunken[['shrunken']] <- get.eval.list(stages.levels.comb[tr.ind], 
-                                              cv.model$shrunken$shrunken$pred)
-knn.pred <- lapply(cv.model$shrunken$knn, function(model)
+get.cv.res <- function(tr.ind, cv.model, stages, fea.names)
+{
+  cv.results <- list()
+  for(i in fea.names)
   {
-  model$pred
-})
-cv.results$shrunken[['knn']] <- get.eval.list(stages.levels.comb[tr.ind], 
-                                                   knn.pred)
-cv.results$shrunken[c('svm','rf', 'nb')] <- lapply(cv.model$shrunken[c('svm','rf', 'nb')],
-                                        function(pred.cv){
-                                        get.eval.list(stages.levels.comb[tr.ind], pred.cv)
-                                                   })
-#########Test######
-test.results[['shrunken']] <- list()
-test.results$shrunken <- lapply(test.pred$shrunken, function(pred.test){
-  get.eval.list(stages.levels.comb[te.ind], pred.test)
-})
-#############Shrunken feature##################
+    if(is.null(cv.results[[i]]))
+      cv.results[[i]] <- list()
+    cv.results[[i]][['shrunken']] <- get.eval.list(stages[tr.ind], 
+                                                       cv.model[[i]]$shrunken$pred)
+    knn.pred <- lapply(cv.model[[i]][['knn']], function(model)
+    {
+      model$pred
+    })
+    cv.results[[i]][['knn']] <- get.eval.list(stages[tr.ind], 
+                                                  knn.pred)
+    cv.results[[i]][c('svm','rf', 'nb')] <- lapply(cv.model[[i]][c('svm','rf', 'nb')],
+                                                       function(pred.cv){
+                                                          get.eval.list(stages[tr.ind], pred.cv)
+                                                       })
+  }   
+  return(cv.results)
+}
 
-###############VarSelRF feature###############
-###################CV###########
-cv.results[['varSelRF']] <- list()
-cv.results$varSelRF[['shrunken']] <- get.eval.list(stages.levels.comb[tr.ind],
-                                                   cv.model$varSelRF$shrunken$pred)
-knn.pred <- lapply(cv.model$varSelRF$knn, function(model)
+get.test.res <- function(test.pred, te.ind, stages, fea.names)
 {
-  model$pred
-})
-cv.results$varSelRF[['knn']] <- get.eval.list(stages.levels.comb[tr.ind], knn.pred)
-cv.results$varSelRF[c('svm','rf', 'nb')] <- lapply(cv.model$varSelRF[c('svm','rf', 'nb')],
-                                                   function(pred.cv){
-                                                get.eval.list(stages.levels.comb[tr.ind], pred.cv)
-                                                   })
-##########Test########
-test.results[['varSelRF']] <- list()
-test.results$varSelRF <- lapply(test.pred$varSelRF, function(pred.test){
-  get.eval.list(stages.levels.comb[te.ind], pred.test)
-})
-###############VarSelRF feature##############
-
-###############DeSeq2 feature#################
-########CV##########
-cv.results[['deseq2_2']] <- list()
-cv.results$deseq2_2[['shrunken']] <- get.eval.list(stages.levels.comb[tr.ind],
-                                                   cv.model$deseq2_2$shrunken$pred)
-knn.pred <- lapply(cv.model$deseq2_2$knn, function(model)
-{
-  model$pred
-})
-cv.results$deseq2_2[['knn']] <- get.eval.list(stages.levels.comb[tr.ind], knn.pred)
-cv.results$deseq2_2[c('svm','rf', 'nb')] <- lapply(cv.model$deseq2_2[c('svm','rf', 'nb')],
-                                                   function(pred.cv){
-                                           get.eval.list(stages.levels.comb[tr.ind], pred.cv)
-                                                   })
-
-cv.results[['deseq2_1.5']] <- list()
-cv.results$deseq2_1.5[['shrunken']] <- get.eval.list(stages.levels.comb[tr.ind],
-                                                   cv.model$deseq2_1.5$shrunken$pred)
-knn.pred <- lapply(cv.model$deseq2_1.5$knn, function(model)
-{
-  model$pred
-})
-cv.results$deseq2_1.5[['knn']] <- get.eval.list(stages.levels.comb[tr.ind], knn.pred)
-cv.results$deseq2_1.5[c('svm','rf', 'nb')] <- lapply(cv.model$deseq2_1.5[c('svm','rf', 'nb')],
-                                                   function(pred.cv){
-                                                     get.eval.list(stages.levels.comb[tr.ind], pred.cv)
-                                                   })
-
-cv.results[['deseq2_1']] <- list()
-cv.results$deseq2_1[['shrunken']] <- get.eval.list(stages.levels.comb[tr.ind],
-                                                   cv.model$deseq2_1$shrunken$pred)
-knn.pred <- lapply(cv.model$deseq2_1$knn, function(model)
-{
-  model$pred
-})
-cv.results$deseq2_1[['knn']] <- get.eval.list(stages.levels.comb[tr.ind], knn.pred)
-cv.results$deseq2_1[c('svm','rf', 'nb')] <- lapply(cv.model$deseq2_1[c('svm','rf', 'nb')],
-                                                   function(pred.cv){
-                                                     get.eval.list(stages.levels.comb[tr.ind], pred.cv)
-                                                   })
-
-cv.results$deseq2_2.5[c('svm','rf', 'nb')] <- lapply(cv.model$deseq2_2.5[c('svm','rf', 'nb')],
-                                                   function(pred.cv){
-                                                     get.eval.list(stages.levels.comb[tr.ind], pred.cv)
-                                                   })
-cv.results$deseq2_3[c('svm','rf', 'nb')] <- lapply(cv.model$deseq2_3[c('svm','rf', 'nb')],
-                                                     function(pred.cv){
-                                get.eval.list(stages.levels.comb[tr.ind], pred.cv)
-                                                     })
-
-#######Test#########
-test.results[['deseq2_2']] <- list()
-test.results$deseq2_2 <- lapply(test.pred$deseq2_2, function(pred.test){
-  get.eval.list(stages.levels.comb[te.ind], pred.test)
-})
-test.results[['deseq2_1.5']] <- list()
-test.results$deseq2_1.5 <- lapply(test.pred$deseq2_1.5, function(pred.test){
-  get.eval.list(stages.levels.comb[te.ind], pred.test)
-})
-test.results[['deseq2_1']] <- list()
-test.results$deseq2_1 <- lapply(test.pred$deseq2_1, function(pred.test){
-  get.eval.list(stages.levels.comb[te.ind], pred.test)
-})
-
-###############DeSeq2 feature#################
-save(cv.results, file = 'environment/accuracy_feature/updated/cv_results.RData')
-save(test.results, file = 'environment/accuracy_feature/updated/test_results.RData')
+  test.results <- list()
+  for(i in fea.names)
+  {
+    test.results[[i]] <- list()
+    test.results[[i]] <- lapply(test.pred[[i]], function(pred.test){
+      get.eval.list(stages[te.ind], pred.test)
+    })  
+  }
+  return(test.results)
+}
+cv.trial.results <- get.cv.res(train.trial.ind, cv.trial.model, stages.levels.comb, names(fea.trial.list))
+test.trial.results <- get.test.res(test.pred.trial, test.trial.ind, stages.levels.comb, names(fea.trial.list))
+save(cv.trial.results, file = 'environment/accuracy_feature/updated/new_data/cv_results.RData')
+save(test.trial.results, file = 'environment/accuracy_feature/updated/new_data/test_results.RData')
 
 ###Final Performance
 perf.test <- list()
