@@ -89,3 +89,21 @@ p5 <- ggplot(a, aes(x=Classifier, y=F_val, fill=Feature_Selection)) +
   geom_boxplot()
 multiplot(p1,p2,p3,p4,p5, cols =2)
 
+trial.test.res.df <- create.net.df(test.results)
+trial.cv.res.df <- create.net.df(cv.results)
+
+create.net.plot <- function(res)
+{
+  p1 <- ggplot(res, aes(x=Classifier, y=AUC, fill=Feature_Selection)) +
+    geom_boxplot()
+  p2 <- ggplot(res, aes(x=Classifier, y=Accuracy, fill=Feature_Selection)) +
+    geom_boxplot()
+  p3 <- ggplot(res, aes(x=Classifier, y=Specificity, fill=Feature_Selection)) +
+    geom_boxplot()
+  p4 <- ggplot(res, aes(x=Classifier, y=Sensitivity, fill=Feature_Selection)) +
+    geom_boxplot()
+  p5 <- ggplot(res, aes(x=Classifier, y=F_val, fill=Feature_Selection)) +
+    geom_boxplot()
+  multiplot(p1,p2,p3,p4,p5, cols =2)
+}
+create.net.plot(trial.cv.res.df)
