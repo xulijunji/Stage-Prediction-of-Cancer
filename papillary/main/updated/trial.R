@@ -6,7 +6,7 @@ trial.res[['shrunken']] <- lapply(net.features.trial$shrunken[c(3,4,5,6)], funct
   {
   final.res(vst_tumor_tum, train.trial.ind, test.trial.ind, stages.levels.comb, genes, 10)
 })
-trial.res[['varselRF']] <- lapply(net.features.trial$shrunken[c(3,4,5,6)], function(genes)
+trial.res[['varselRF']] <- lapply(net.features.trial$varSelRF[c(3,4,5,6)], function(genes)
 {
   final.res(vst_tumor_tum, train.trial.ind, test.trial.ind, stages.levels.comb, genes, 10)
 })
@@ -51,7 +51,7 @@ trial.res.new.feat <- lapply(deseq.or.features$`2 fold`, function(genes)
 {final.res(vst_tumor_tum, train.trial.ind, test.trial.ind, 
            stages.levels.comb, genes, 10)})
 
-b <- create.net.df(test.results)
+ <- create.net.df(test.results)
 b.cv <- create.net.df(cv.results)
 
 library(ggplot2)
