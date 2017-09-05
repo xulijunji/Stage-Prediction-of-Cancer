@@ -45,6 +45,8 @@ test.trial.results <- get.test.res(test.pred.trial, test.trial.ind, stages.level
 save(cv.trial.results, file = 'environment/accuracy_feature/updated/new_data/cv_results.RData')
 save(test.trial.results, file = 'environment/accuracy_feature/updated/new_data/test_results.RData')
 
+cv.orig.results <- get.cv.res(train.indexes, cv.orig.model, stages.levels.comb, names(fea.orig.list))
+test.orig.results <- get.test.res(test.orig.pred, test.indexes, stages.levels.comb, names(fea.orig.list))
 ###Final Performance
 perf.test <- list()
 perf.test[['mean']] <- list()

@@ -124,8 +124,8 @@ get.features <- function(data, stages, train.ind.list)
   
   return(net.features)
 }
-net.features.updated <- get.features(vst_tumor_tum, stages.levels.comb, gr.updated.train)
-net.features.trial <- get.features(vst_tumor_tum, stages.levels.comb, gr.trial.train)
+# net.features.updated <- get.features(vst_tumor_tum, stages.levels.comb, gr.updated.train)
+# net.features.trial <- get.features(vst_tumor_tum, stages.levels.comb, gr.trial.train)
 
 
 get.filter.fea <- function(features.list, folds.list)
@@ -151,8 +151,8 @@ get.class.fea <- function(net.fea)
     else
     {
       temp.fea <- get.filter.fea(net.fea[[fea.name]][c(3,4,5,6)], paste0(c(1,1.5,2), ' fold'))
-      for(j in seq_along(de))
-        fea.list[[paste0(fea.name, names(de)[j])]] <- temp.fea[[names(de)[j]]]
+      for(j in seq_along(temp.fea))
+        fea.list[[paste0(fea.name, names(temp.fea)[j])]] <- temp.fea[[names(temp.fea)[j]]]
     }
   }
   return(fea.list)

@@ -2,8 +2,7 @@ source('main/updated/initialisation.R')
 
 get.train.model <- function(data, tr.ind, fea.list, stages)
 {
-  train.model <- list()  
-  fea.list <- get.class.fea(net.fea)
+  train.model <- list() 
   for(i in seq_along(fea.list))
   {
     fea.name <- names(fea.list)[i]
@@ -25,7 +24,6 @@ get.train.model <- function(data, tr.ind, fea.list, stages)
 get.cv.model <- function(data, tr.ind, fea.list, stages, tr.model)
 {
   cv.model <- list()
-  fea.list <- get.class.fea(net.fea)
   for(i in seq_along(fea.list))
   {
     fea.name <- names(fea.list)[i]
@@ -68,11 +66,16 @@ get.test.pred <- function(data, tr.ind, te.ind, fea.list, stages, tr.model, cv.m
 }
 
 fea.trial.list <-  get.class.fea(net.features.trial)
-train.trial.model <- get.train.model(vst_tumor_tum, train.trial.ind, fea.list, stages.levels.comb)
-cv.trial.model <- get.cv.model(vst_tumor_tum, train.trial.ind, fea.list, stages.levels.comb, tr.model)
-test.pred.trial <- get.test.pred(vst_tumor_tum, train.trial.ind, test.trial.ind, fea.list, 
+train.trial.model <- get.train.model(vst_tumor_tum, train.trial.ind, fea.trial.list, stages.levels.comb)
+cv.trial.model <- get.cv.model(vst_tumor_tum, train.trial.ind, fea.trial.list, stages.levels.comb, tr.model)
+test.pred.trial <- get.test.pred(vst_tumor_tum, train.trial.ind, test.trial.ind, fea.trial.list, 
                                  stages.levels.comb, train.trial.model, cv.trial.model)
 
+fea.orig.list <- get.class.fea(net.features.updated)
+train.orig.model <- get.train.model(vst_tumor_tum, train.indexes, fea.orig.list, stages.levels.comb)
+cv.orig.model <- get.cv.model(vst_tumor_tum, train.indexes, fea.orig.list, stages.levels.comb, train.orig.model)
+test.orig.pred <- get.test.pred(vst_tumor_tum, train.indexes, test.indexes, fea.orig.list, 
+                                stages.levels.comb, train.orig.model, cv.orig.model)
 save(train.trial.model, file = 'environment/accuracy_feature/updated/new_data/train_model.RData')
 save(cv.trial.model, file = 'environment/accuracy_feature/updated/new_data/cv_model.RData')
 save(test.pred.trial, file = 'environment/accuracy_feature/updated/new_data/test_pred.RData')
