@@ -157,3 +157,5 @@ get.class.fea <- function(net.fea)
   }
   return(fea.list)
 }
+
+net.features.trial.gr <- get.features(vst_tumor_tum, stages.levels.comb, train.trial.ind)

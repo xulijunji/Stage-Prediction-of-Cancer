@@ -195,12 +195,12 @@ wcgna.genes.ent.ens <- 	c('ENSG00000112984', 'ENSG00000175063',	'ENSG00000186185
   
 intersect(g_2_1, wcgna.genes.ent.ens)
 intersect(net.features.updated$deseq2$atleast_1$`2 fold`, wcgna.genes.ent.ens)
-res.wcgna <- final.res(vst_tumor_tum, train.indexes, test.indexes, stages.levels.comb, wcgna.genes.ent.ens, 
+res.wcgna <- final.res(vst_tumor_tum, train.trial.ind, test.trial.ind, stages.levels.comb, wcgna.genes.ent.ens, 
                        10)
 g = intersect(net.features.updated$shrunken$atleast_1, diff.genes$`2`)
 res.g <- final.res(vst_tumor_tum, train.indexes, test.indexes, stages.levels.comb, g, 
                    10)
-
+length(intersect(wcgna.genes.ent, net.fe))
 get.aucs(res.wcgna[[1]])
 get.aucs(res.wcgna[[2]])
 get.aucs(res_1_2[[1]])

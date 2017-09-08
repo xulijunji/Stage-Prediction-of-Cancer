@@ -47,13 +47,16 @@ do.shrunken <- function(gr, data, stages.levels, confusion.mat, eval.mat)
   return(list(confusion.mat, eval.mat, pamr.genes.comb))
 }
 
-do.varselRF <- function(gr, data, stages)
+do.varselRF <- function(gr, data, stages, type = 1)
 {
   model.vars <- list()
   model.selec_his <- list()
   for(i in seq_along(gr))
   {
-    train.indexes = sort(unlist(gr[-i]))
+    if(type == 1)
+      train.indexes = sort(unlist(gr[-i]))
+    else
+      train.indexes = sort(unlist(gr[[i]]))
     var.ob <- varSelRF(xdata = data[train.indexes,], 
                        Class = stages[train.indexes])
     model.vars[[i]] = var.ob
@@ -62,11 +65,14 @@ do.varselRF <- function(gr, data, stages)
   return(model.vars)
 }
 
-create.Deseq2 <- function(gr, counts_data, colData)
+create.Deseq2 <- function(gr, counts_data, colData, type = 1)
 {
   deseq_list <- lapply(seq(length(gr)), function(x)
     {
-    train.ind  <- sort(unlist(gr[-x]))
+    if(type == 1)
+      train.ind  <- sort(unlist(gr[-x]))
+    else
+      train.ind <- sort(unlist(gr[[i]]))
     dds_obj <- DESeqDataSetFromMatrix(counts_data[,train.ind],
                             colData = colData[train.ind,], design = ~stage)
     dds_obj <- dds_obj[rowSums(assay(dds_obj)) > 2]

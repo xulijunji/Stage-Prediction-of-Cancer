@@ -60,3 +60,21 @@ ggplot(b, aes(x=Classifier, y=AUC, fill=Feature_Selection)) +
 
 micr.class <- final.res(t(merged_final[,1:34]), c(1:34), c(1:34), sample_micro_info$stage, 
                         net.features.trial$varSelRF$atleast_4, 10)
+
+get.intersect <- function(genes.list)
+{
+  return(Reduce(intersect, genes.list))
+}
+g1 <- get.intersect(list(fea.trial.list$`sam1.5 fold`$atleast_3, fea.trial.list$`deseq21.5 fold`$atleast_3,
+                         fea.trial.list$varSelRF$atleast_3, fea.trial.list$shrunken$atleast_3))
+length(g1)
+t <- final.res(vst_tumor_tum, train.trial.ind, test.trial.ind, stages.levels.comb, g1, 10)
+get.aucs(t[[2]])
+1get.aucs(res.wcgna[[2]])
+length(intersect(wcgna.genes.ent.ens, g1))
+intersect(wcgna.genes.ent.ens, diff.genes$`2`)
+
+res.wcgna.mine <- final.res(vst_tumor_tum, train.trial.ind, test.trial.ind, stages.levels.comb,
+                            intersect(g1, wcgna.genes.ent.ens), 10)
+get.aucs(res.wcgna.mine[[1]])                  
+length(intersect(fea.trial.list$varSelRF$atleast_4, wcgna.genes.ent.ens))

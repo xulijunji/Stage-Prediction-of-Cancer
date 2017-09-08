@@ -28,7 +28,7 @@ get.pca.var <- function(pca.var = F, train.data, test.data, thr)
   return(list(train.data, test.data))
 }
 
-get.shrunken.features <- function(gr, data, stages.levels)
+get.shrunken.features <- function(gr, data, stages.levels, type = 1)
 {
   pamr.train.list <- list()
   pamr.cv.list <- list()
@@ -36,8 +36,10 @@ get.shrunken.features <- function(gr, data, stages.levels)
   pamr.genes.list <- list()
   for(i in seq_along(gr))
   {
-    train.ind <- sort(unlist(gr[-i]))
-    test.ind <- sort(unlist(gr[i]))
+    if(type == 1)
+      train.ind <- sort(unlist(gr[-i]))
+    else
+      train.ind <- sort(unlist(gr[[i]]))
     pamr.train.list[[i]] <- pamr.train(list(x = as.matrix(t(data[train.ind,])), 
                                             y = stages.levels[train.ind]))
     pamr.cv.list[[i]] <- pamr.cv(pamr.train.list[[i]], 
@@ -300,7 +302,7 @@ final.res <- function(data, train.ind, test.ind, stages.levels, genes, folds, pc
 return(list(res.cv, res.test))
 }
 
-get.sam.features <- function(gr, data, stages)
+get.sam.features <- function(gr, data, stages, type = 1)
 {
   library(samr)
   source('sam/sam_func_cop.R')
@@ -318,7 +320,10 @@ get.sam.features <- function(gr, data, stages)
   }
   for(i in seq_along(gr))
   {
-    train.ind <- unlist(gr[-i])
+    if(type == 1)
+      train.ind <- unlist(gr[[-i]])
+    else
+      train.ind <- unlist(gr[[i]])
     req.data <- data[, train.ind]
     print(nrow(req.data))
     print(ncol(req.data))
