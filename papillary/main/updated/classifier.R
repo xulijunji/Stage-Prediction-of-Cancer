@@ -65,17 +65,17 @@ get.test.pred <- function(data, tr.ind, te.ind, fea.list, stages, tr.model, cv.m
   return(test.pred)
 }
 
-fea.trial.list <-  get.class.fea(net.features.trial)
-train.trial.model <- get.train.model(vst_tumor_tum, train.trial.ind, fea.trial.list, stages.levels.comb)
-cv.trial.model <- get.cv.model(vst_tumor_tum, train.trial.ind, fea.trial.list, stages.levels.comb, tr.model)
-test.pred.trial <- get.test.pred(vst_tumor_tum, train.trial.ind, test.trial.ind, fea.trial.list, 
-                                 stages.levels.comb, train.trial.model, cv.trial.model)
-
-fea.orig.list <- get.class.fea(net.features.updated)
-train.orig.model <- get.train.model(vst_tumor_tum, train.indexes, fea.orig.list, stages.levels.comb)
-cv.orig.model <- get.cv.model(vst_tumor_tum, train.indexes, fea.orig.list, stages.levels.comb, train.orig.model)
-test.orig.pred <- get.test.pred(vst_tumor_tum, train.indexes, test.indexes, fea.orig.list, 
-                                stages.levels.comb, train.orig.model, cv.orig.model)
-save(train.trial.model, file = 'environment/accuracy_feature/updated/new_data/train_model.RData')
-save(cv.trial.model, file = 'environment/accuracy_feature/updated/new_data/cv_model.RData')
-save(test.pred.trial, file = 'environment/accuracy_feature/updated/new_data/test_pred.RData')
+# fea.trial.list <-  get.class.fea(net.features.trial)
+# train.trial.model <- get.train.model(vst_tumor_tum, train.trial.ind, fea.trial.list, stages.levels.comb)
+# cv.trial.model <- get.cv.model(vst_tumor_tum, train.trial.ind, fea.trial.list, stages.levels.comb, tr.model)
+# test.pred.trial <- get.test.pred(vst_tumor_tum, train.trial.ind, test.trial.ind, fea.trial.list, 
+#                                  stages.levels.comb, train.trial.model, cv.trial.model)
+# 
+# fea.orig.list <- get.class.fea(net.features.updated)
+# train.orig.model <- get.train.model(vst_tumor_tum, train.indexes, fea.orig.list, stages.levels.comb)
+# cv.orig.model <- get.cv.model(vst_tumor_tum, train.indexes, fea.orig.list, stages.levels.comb, train.orig.model)
+# test.orig.pred <- get.test.pred(vst_tumor_tum, train.indexes, test.indexes, fea.orig.list, 
+#                                 stages.levels.comb, train.orig.model, cv.orig.model)
+# save(train.trial.model, file = 'environment/accuracy_feature/updated/new_data/train_model.RData')
+# save(cv.trial.model, file = 'environment/accuracy_feature/updated/new_data/cv_model.RData')
+# save(test.pred.trial, file = 'environment/accuracy_feature/updated/new_data/test_pred.RData')

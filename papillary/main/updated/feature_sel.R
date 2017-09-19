@@ -1,9 +1,9 @@
 source('main/updated/initialisation.R')
 #net.features.updated <- list()
-get.feature.shrunken <- function(data, stages, train.ind.list)
+get.feature.shrunken <- function(data, stages, train.ind.list, type = 1)
 {
   shrunken.features <- list()
-  shrunken.features.ob <- get.shrunken.features(train.ind.list, data, stages)
+  shrunken.features.ob <- get.shrunken.features(train.ind.list, data, stages, type)
   shrunken.features[['genes.object']] <- shrunken.features.ob$genes
   shrunken.features[['genes']] <- get.genes.shrunken(shrunken.features$genes.object)
   shrunken.features[['atleast_1']] <- get.genes.common(shrunken.features$genes, 1)
@@ -16,11 +16,11 @@ get.feature.shrunken <- function(data, stages, train.ind.list)
   return(shrunken.features)
 }
 
-get.feature.varSelRf <- function(data, stages, train.ind.list)
+get.feature.varSelRf <- function(data, stages, train.ind.list, type = 1)
 {
   varselRF.features <- list()
-  varselRF.features[['genes.object']] <- do.varselRF(train.ind.list, data, stages)
-  varSelRF.features[['genes.list']] <- get.min.oob.varselRf(varselRF.features$genes.object)
+  varselRF.features[['genes.object']] <- do.varselRF(train.ind.list, data, stages, type)
+  varselRF.features[['genes.list']] <- get.min.oob.varselRf(varselRF.features$genes.object)
   varselRF.features[['atleast_1']] <- get.genes.common(varselRF.features$genes.list,1)
   varselRF.features[['atleast_2']] <- get.genes.common(varselRF.features$genes.list,2)
   varselRF.features[['atleast_3']] <- get.genes.common(varselRF.features$genes.list,3)
@@ -29,7 +29,7 @@ get.feature.varSelRf <- function(data, stages, train.ind.list)
   return(varselRF.features)
 }
 
-get.feature.deseq2 <- function(dds.tum, stages, train.ind.list)
+get.feature.deseq2 <- function(dds.tum, stages, train.ind.list, type = 1)
 {
   sample.df <- colData(dds.tum)
   sample.df[,3] <- sapply(as.character(sample.df[,3]), function(stage)
@@ -44,7 +44,7 @@ get.feature.deseq2 <- function(dds.tum, stages, train.ind.list)
   sample.df$stage <- as.factor(sample.df$stage)
   
   dds_obj <- create.Deseq2(train.ind.list, counts(dds.tum),
-                           colData = sample.df)
+                           colData = sample.df, type = type)
   res.train.dds_obj <- do.Deseq2(dds_obj)
   
   features.deseq2 <- list()
@@ -73,9 +73,9 @@ get.feature.deseq2 <- function(dds.tum, stages, train.ind.list)
   
 }
 
-get.features.sam <- function(data, stages, train.ind.list)
+get.features.sam <- function(data, stages, train.ind.list, type = 1)
 {
-  res.sam <- get.sam.features(train.ind.list, data, stages)
+  res.sam <- get.sam.features(train.ind.list, data, stages, type = type)
   sam.genes <- lapply(res.sam, function(sam.obj)
   {
     a <- rbind(sam.obj$siggenes.table$genes.up, sam.obj$siggenes.table$genes.lo)
@@ -158,4 +158,4 @@ get.class.fea <- function(net.fea)
   return(fea.list)
 }
 
-net.features.trial.gr <- get.features(vst_tumor_tum, stages.levels.comb, train.trial.ind)
+#net.features.trial.gr <- get.features(vst_tumor_tum, stages.levels.comb, train.trial.ind)

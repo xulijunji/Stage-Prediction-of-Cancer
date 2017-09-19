@@ -68,6 +68,8 @@ library(doParallel)
 registerDoParallel(cores = 8)
 View(bmp$table)
 
+library(COHCAP)
+
 
 ###
 source('main/updated/initialisation.R')

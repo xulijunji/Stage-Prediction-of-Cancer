@@ -4,6 +4,11 @@ query.met <- GDCquery(project = "TCGA-KIRP", data.category = 'DNA Methylation')
 GDCdownload(query.met, directory = '../../../temp_kirp/')
 data <- GDCprepare(query.met, directory = '../../../temp_kirp')
 
+query.met.450k <- GDCquery(project = c("TCGA-KIRP"),
+                                       data.category = "DNA Methylation",
+                                       platform = c("Illumina Human Methylation 450"))
+  
+data.450k <- GDCprepare(query.met.450k, directory = '../../../KIRP/450/')  
 table(query.met$results[[1]]$tissue.definition)
 
 head(query.met$access)
