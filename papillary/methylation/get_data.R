@@ -24,7 +24,7 @@ get.case.from.sample <- function(samples)
 {
   cases <- sapply(strsplit(samples, split = '-', fixed = T), function(case)
   {
-    paste(case[1], case[2], case[3], sep = '-')
+    paste(case[1], case[2], case[3], case[4], sep = '-')
   })
   return(cases)
 }

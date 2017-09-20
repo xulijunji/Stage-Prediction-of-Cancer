@@ -25,6 +25,8 @@ hist(rowSds(assay(meth.tum.rep.data)))
 
 probes <- strsplit(rowData(meth.tum.rep.data)[,2], ';', fixed = T)
 probe.uniq.ind <- which(sapply(sapply(probes, unique), length) == 1)
+probes.uniqe <- sapply(probes[probe.uniq.ind], unique)
+names(probes.uniqe) <- rownames(meth.tum.rep.data)
 
 meth.tum.rep.data <- meth.tum.rep.data[probe.uniq.ind,]
 densityPlot(assay(meth.tum.rep.data), sampGroups = stages.levels.comb)
