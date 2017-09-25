@@ -67,6 +67,16 @@ table(colData(mat.450k.req)[,10])
 nrow(assay(mat.450k.req))
 dmp.450k1 <- dmpFinder(dat = assay(mat.450k.req), pheno = stages.levels.comb[stage.ind.450k],
                       type = 'categorical', qCutoff = 0.05 )
+
+library(doMC)
+library(foreach)
+registerDoMC(4)
+stage.meth.450 <- stages.levels.comb[stage.ind.450k]
+stagei.ind <- which(stage.meth.450 == 'stage i')
+stageiv.ind <- which(stage.meth.450 == 'stage iv')
+beta.diff <- rowMeans(assay(mat.450k.req)[rownames(dmp.450k1), stagei.ind]) -
+rowMeans(assay(mat.450k.req)[rownames(dmp.450k1), stageiv.ind])
+dmp.450k1 <- cbind(dmp.450k1, diff = beta.diff)
 nrow(dmp.450k1)
 
 sum(sort(stage.ind.450k) == stage.ind.450k)
@@ -89,6 +99,8 @@ get.stage.distribution(gr.450k, stages.levels.comb)
 gr.450k.train <- gr.450k[-5]
 
 net.450.cpgs <- list()
-net.450.cpgs[['shrunken']] <- get.feature.shrunken(t(assay(mat.450k.req)), stages.levels.comb[stage.ind.450k], gr.new.450[-5])
+net.450.cpgs[['shrunken']] <- get.feature.shrunken(t(assay(mat.450k.req)[rownames(dmp.450k1),]), stages.levels.comb[stage.ind.450k], gr.new.450[-5])
+library(doParallel)
+registerDoParallel(5)
 vs <-get.feature.varSelRf(t(assay(mat.450k.req)), stages.levels.comb[stage.ind.450k], gr.new.450[-5])
 sum(get.case.from.sample(colnames(mat.450k.req)) == get.case.from.sample(sample.info.all.rep$sample.names[tumor.ind.vs][stage.ind.450k]))

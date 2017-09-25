@@ -50,7 +50,9 @@ get.shrunken.features <- function(gr, data, stages.levels, type = 1)
     {
       multiclass.roc(stages.levels[train.ind], ordered(pamr.cv.list[[i]]$yhat[,x]))$auc
     })
-    thr.ind = which.max(pamr.aucs.list[[i]])
+    print(pamr.aucs.list[[i]])
+    thr.ind = sort(which(pamr.aucs.list[[i]] == max(pamr.aucs.list[[i]])), decreasing = T)[1]
+    print(thr.ind)
     print(pamr.aucs.list[[i]][thr.ind])
     
     pamr.genes.list[[i]] <- pamr.listgene(pamr.train.list[[i]], 

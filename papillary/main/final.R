@@ -49,9 +49,12 @@ do.shrunken <- function(gr, data, stages.levels, confusion.mat, eval.mat)
 
 do.varselRF <- function(gr, data, stages, type = 1)
 {
+  library(foreach)
+  library(doMC)
+  registerDoMC(4)
   model.vars <- list()
   model.selec_his <- list()
-  for(i in seq_along(gr))
+  foreach(i =1:seq(length(gr))) %dopar%
   {
     if(type == 1)
       train.indexes = sort(unlist(gr[-i]))

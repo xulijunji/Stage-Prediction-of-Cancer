@@ -4,16 +4,16 @@ get.feature.shrunken <- function(data, stages, train.ind.list, type = 1)
 {
   shrunken.features <- list()
   shrunken.features.ob <- get.shrunken.features(train.ind.list, data, stages, type)
-  shrunken.features[['genes.object']] <- shrunken.features.ob$genes
-  shrunken.features[['genes']] <- get.genes.shrunken(shrunken.features$genes.object)
-  shrunken.features[['atleast_1']] <- get.genes.common(shrunken.features$genes, 1)
-  shrunken.features[['atleast_2']] <- get.genes.common(shrunken.features$genes, 2)
-  shrunken.features[['atleast_3']] <- get.genes.common(shrunken.features$genes, 3)
-  shrunken.features[['atleast_4']] <- get.genes.common(shrunken.features$genes, 4)
-  shrunken.features[['genes_stage']] <- get.shrunken.group.stage(shrunken.features$genes.object)
-  #shrunken.features[['atleast_dfs']] <- get.shrunken.common.stage(shrunken.features$genes_stage, c(1,2,3,4))
+  # shrunken.features[['genes.object']] <- shrunken.features.ob$genes
+  # shrunken.features[['genes']] <- get.genes.shrunken(shrunken.features$genes.object)
+  # shrunken.features[['atleast_1']] <- get.genes.common(shrunken.features$genes, 1)
+  # shrunken.features[['atleast_2']] <- get.genes.common(shrunken.features$genes, 2)
+  # shrunken.features[['atleast_3']] <- get.genes.common(shrunken.features$genes, 3)
+  # shrunken.features[['atleast_4']] <- get.genes.common(shrunken.features$genes, 4)
+  # shrunken.features[['genes_stage']] <- get.shrunken.group.stage(shrunken.features$genes.object)
+  # shrunken.features[['atleast_dfs']] <- get.shrunken.common.stage(shrunken.features$genes_stage, c(1,2,3,4))
   print('Shrunken Completed')
-  return(shrunken.features)
+  return(shrunken.features.ob)
 }
 
 get.feature.varSelRf <- function(data, stages, train.ind.list, type = 1)
