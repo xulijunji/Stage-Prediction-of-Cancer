@@ -116,7 +116,7 @@ plotPCA = function(object, intgroup, ntop=500, returnData=FALSE, title, colData 
   }
   else
   {
-    
+   
     # perform a PCA on the data in assay(x) for the selected genes
     
     object = na.omit(object)
@@ -147,8 +147,8 @@ plotPCA = function(object, intgroup, ntop=500, returnData=FALSE, title, colData 
     return(d)
   }
   
-  ggplot(data=d, aes_string(x="PC1", y="PC2", color="group")) + geom_point(size=3) + 
-    ggtitle(title)+
+  ggplot(data=d, aes_string(x="PC1", y="PC2", color="group", shape="group")) + geom_point(size=3) + 
+    ggtitle(title)+theme(plot.title = element_text(hjust = 0.5, size = 10 )) +
     xlab(paste0("PC1: ",round(percentVar[1] * 100),"% variance")) +
     ylab(paste0("PC2: ",round(percentVar[2] * 100),"% variance")) +
     coord_fixed() 
