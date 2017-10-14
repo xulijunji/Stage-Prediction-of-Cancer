@@ -66,10 +66,10 @@ get.test.pred <- function(data, tr.ind, te.ind, fea.list, stages, tr.model, cv.m
 }
 
 # fea.trial.list <-  get.class.fea(net.features.trial)
-# train.trial.model <- get.train.model(vst_tumor_tum, train.trial.ind, fea.trial.list, stages.levels.comb)
-# cv.trial.model <- get.cv.model(vst_tumor_tum, train.trial.ind, fea.trial.list, stages.levels.comb, tr.model)
-# test.pred.trial <- get.test.pred(vst_tumor_tum, train.trial.ind, test.trial.ind, fea.trial.list, 
-#                                  stages.levels.comb, train.trial.model, cv.trial.model)
+train.trial.model <- get.train.model(vst_tumor_tum, train.trial.ind, fea.trial.list, stages.levels.comb)
+cv.trial.model <- get.cv.model(vst_tumor_tum, train.trial.ind, fea.trial.list, stages.levels.comb, train.trial.model)
+test.pred.trial <- get.test.pred(vst_tumor_tum, train.trial.ind, test.trial.ind, fea.trial.list, 
+                                  stages.levels.comb, train.trial.model, cv.trial.model)
 # 
 # fea.orig.list <- get.class.fea(net.features.updated)
 # train.orig.model <- get.train.model(vst_tumor_tum, train.indexes, fea.orig.list, stages.levels.comb)

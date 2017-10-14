@@ -9,15 +9,16 @@ lapply(net.features.updated$deseq2[c(3,4,5,6)], function(x)
   sapply(x, length) 
 })
 
-create.list.venn <- function(net.features, fold, group)
+create.list.venn <- function(features.list, fold, group)
 {
   fold <- as.character(fold)
   group <- as.character(group)
-  g1 <- net.features$shrunken[[paste0('atleast_',group)]]
-  g2 <- net.features$varSelRF[[paste0('atleast_',group)]]
-  g3 <- net.features$deseq2[[paste0('atleast_',group)]][[paste0(fold, ' fold')]]
-  req.list <- list(g1,g2,g3)
-  names(req.list) <- c('Shrunken', 'VarSelRF', paste0('Deseq2_',fold))
+  g1 <- features.list$shrunken[[paste0('atleast_',group)]]
+  g2 <- features.list$varSelRF[[paste0('atleast_',group)]]
+  g3 <- features.list[[paste0('deseq2',fold, ' fold')]][[paste0('atleast_',group)]]
+  g4 <- features.list[[paste0('sam',fold, ' fold')]][[paste0('atleast_',group)]]
+  req.list <- list(g1,g2,g3,g4)
+  names(req.list) <- c('Shrunken', 'VarSelRF', paste0('Deseq2_log2FC ',fold), paste0('SamSeq_log2FC ',fold))
   return(req.list)
 }
 #1.5 fold
@@ -162,7 +163,7 @@ sample.info.all.rep$comb.stage <- as.factor(sapply(sample.info.all.rep$stage.typ
   else
     'N'
 }))
-breaks = c(seq(5,10, length.out = 70), seq(10.1,24, length.out = 30))
+breaks = c(seq(5,10, length.out =70), seq(10.1,24, length.out = 30))
 data = vs_normal_comb_reported[,late.stage.genes]
 clus_rows = run_hclust_on_a_matrix(data)
 clus_cols = run_hclust_on_a_matrix(t(data))

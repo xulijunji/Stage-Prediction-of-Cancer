@@ -56,11 +56,14 @@ fea.micr <- list()
 for(i in seq_along(fea.trial.list))
   fea.micr[[names(fea.trial.list)[i]]] <- lapply(fea.trial.list[[names(fea.trial.list)[i]]], function(g) intersect(g, micr_genes))
 
-train.micr <- get.train.model(micr_df, tr.ind = c(1:34), fea.micr.old, as.factor(sample_micro_info$stage))
-cv.micr <- get.cv.model(micr_df, 1:34, fea.micr.old, as.factor(sample_micro_info$stage), train.micr)
-cv.micr.res <- get.cv.res(1:34, cv.micr, as.factor(sample_micro_info$stage), names(fea.micr.old))
+train.micr <- get.train.model(micr_df, tr.ind = c(1:34), fea.micr, as.factor(sample_micro_info$stage))
+cv.micr <- get.cv.model(micr_df, 1:34, fea.micr, as.factor(sample_micro_info$stage), train.micr)
+cv.micr.res <- get.cv.res(1:34, cv.micr, as.factor(sample_micro_info$stage), names(fea.micr))
 
 micr.net.df <-create.net.df(cv.micr.res)
+ggplot(micr.net.df, aes(x=Classifier, y=AUC, fill=Feature_Selection)) +
+  geom_boxplot()
+
 create.net.plot(micr.net.df)
 get.aucs(cv.micr.res$`sam1 fold`$shrunken)
 

@@ -49,13 +49,10 @@ do.shrunken <- function(gr, data, stages.levels, confusion.mat, eval.mat)
 
 do.varselRF <- function(gr, data, stages, type = 1)
 {
-  library(foreach)
-  library(doMC)
-  registerDoMC(4)
-  model.vars <- list()
-  model.selec_his <- list()
-  foreach(i =1:seq(length(gr))) %dopar%
+  print(length(gr))
+  for(i in seq_along(gr)) 
   {
+    print(i)
     if(type == 1)
       train.indexes = sort(unlist(gr[-i]))
     else
@@ -63,6 +60,7 @@ do.varselRF <- function(gr, data, stages, type = 1)
     var.ob <- varSelRF(xdata = data[train.indexes,], 
                        Class = stages[train.indexes])
     model.vars[[i]] = var.ob
+    
     #model.selec_his[[i]] = var.ob$selec.history
   }
   return(model.vars)

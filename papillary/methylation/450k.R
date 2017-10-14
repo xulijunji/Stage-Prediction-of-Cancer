@@ -44,9 +44,10 @@ probes.450k <- strsplit(rowData(meth.450k.tum.rep.data)[,2], ';', fixed = T)
 probe.450k.uniq.ind <- which(sapply(sapply(probes.450k, unique), length) == 1)
 length(probe.450k.uniq.ind)
 probes.450k.uniqe <- sapply(probes.450k[probe.450k.uniq.ind], unique)
+names(probes.450k.uniqe) = rowData(meth.450k.tum.rep.data)[,1]
 
 meth.450k.tum.rep.data <- meth.450k.tum.rep.data[probe.450k.uniq.ind,]
-densityPlot(assay(meth.450k.tum.rep.data))
+densityPlot(assay(meth.450k.tum.rep.data), sampGroups = stage)
 ##Outlier
 high.ind <- order(apply(assay(meth.450k.tum.rep.data), 2, function(col) sum(col < 0.2)), decreasing = T)[1]
 densityPlot(assay(meth.450k.tum.rep.data)[, -high.ind])
@@ -65,19 +66,19 @@ table(stages.levels.comb[stage.ind.450k])
 table(colData(mat.450k.req)[,10])
 
 nrow(assay(mat.450k.req))
-dmp.450k1 <- dmpFinder(dat = assay(mat.450k.req), pheno = stages.levels.comb[stage.ind.450k],
+dmp.450k <- dmpFinder(dat = assay(mat.450k.req), pheno = stages.levels.comb[stage.ind.450k],
                       type = 'categorical', qCutoff = 0.05 )
+stage.meth.450 <- stages.levels.comb[stage.ind.450k]
+stagei.ind <- which(stage.meth.450 == 'stage i')
+stageiv.ind <- which(stage.meth.450 == 'stage iv')
+beta.diff <- rowMeans(assay(mat.450k.req)[rownames(dmp.450k), stagei.ind]) -
+    rowMeans(assay(mat.450k.req)[rownames(dmp.450k), stageiv.ind])
+dmp.450k <- cbind(dmp.450k, diff = beta.diff)
+nrow(dmp.450k)
 
 library(doMC)
 library(foreach)
 registerDoMC(4)
-stage.meth.450 <- stages.levels.comb[stage.ind.450k]
-stagei.ind <- which(stage.meth.450 == 'stage i')
-stageiv.ind <- which(stage.meth.450 == 'stage iv')
-beta.diff <- rowMeans(assay(mat.450k.req)[rownames(dmp.450k1), stagei.ind]) -
-rowMeans(assay(mat.450k.req)[rownames(dmp.450k1), stageiv.ind])
-dmp.450k1 <- cbind(dmp.450k1, diff = beta.diff)
-nrow(dmp.450k1)
 
 sum(sort(stage.ind.450k) == stage.ind.450k)
 ordered.stage.ind <- order(stage.ind.450k)
@@ -103,4 +104,5 @@ net.450.cpgs[['shrunken']] <- get.feature.shrunken(t(assay(mat.450k.req)[rowname
 library(doParallel)
 registerDoParallel(5)
 vs <-get.feature.varSelRf(t(assay(mat.450k.req)), stages.levels.comb[stage.ind.450k], gr.new.450[-5])
+  save(vs, file = 'environment/methylation/vs.RData')
 sum(get.case.from.sample(colnames(mat.450k.req)) == get.case.from.sample(sample.info.all.rep$sample.names[tumor.ind.vs][stage.ind.450k]))
