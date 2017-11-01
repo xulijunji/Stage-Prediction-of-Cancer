@@ -16,8 +16,12 @@ create.list.venn <- function(features.list, fold, group)
   return(req.list)
 }
 
-venn.diagram(create.list.venn(fea.trial.list, 1, 4), filename = 'int_red.png', 
+venn.diagram(create.list.venn(fea.trial.list, 1.5, 4), filename = 'paper/images/figureS3_A', 
                   fill = c("purple", "indianred2", "pink", 'green'), imagetype = 'png',
-                main = 'Intersection of genes across different feature selection \nalgorithms for group atleast 4', main.cex = 1.5)
+                main = 'Intersection of genes across different feature selection \nalgorithms for log2FC ', main.cex = 1.5)
+venn.diagram(create.list.venn(fea.trial.list, 2, 4), filename = 'paper/images/figureS3_B', 
+             fill = c("purple", "indianred2", "pink", 'green'), imagetype = 'png',
+             main = 'Intersection of genes across different feature selection \nalgorithms for group atleast 4', main.cex = 1.5)
+
 grid.draw(v)
 write(Reduce(intersect, create.list.venn(fea.trial.list, 1, 4)), 'g_int_4.txt')

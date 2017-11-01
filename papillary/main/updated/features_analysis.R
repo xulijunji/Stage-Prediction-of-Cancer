@@ -9,18 +9,7 @@ lapply(net.features.updated$deseq2[c(3,4,5,6)], function(x)
   sapply(x, length) 
 })
 
-create.list.venn <- function(features.list, fold, group)
-{
-  fold <- as.character(fold)
-  group <- as.character(group)
-  g1 <- features.list$shrunken[[paste0('atleast_',group)]]
-  g2 <- features.list$varSelRF[[paste0('atleast_',group)]]
-  g3 <- features.list[[paste0('deseq2',fold, ' fold')]][[paste0('atleast_',group)]]
-  g4 <- features.list[[paste0('sam',fold, ' fold')]][[paste0('atleast_',group)]]
-  req.list <- list(g1,g2,g3,g4)
-  names(req.list) <- c('Shrunken', 'VarSelRF', paste0('Deseq2_log2FC ',fold), paste0('SamSeq_log2FC ',fold))
-  return(req.list)
-}
+
 #1.5 fold
 venn.diagram(create.list.venn(net.features.updated, 1.5, 1), filename = 'images/tumor/feature_updated/1_1.5fold.tiff')
 venn.diagram(create.list.venn(net.features.updated, 1.5, 2), filename = 'images/tumor/feature_updated/2_1.5fold.tiff')
@@ -220,6 +209,7 @@ library(ggplot2)
 
 create.boxplots <- function(gene, data, stage)
 {
+  library(ggplot2)
   boxplots <- list()
   for(i in seq_along(gene))
   {

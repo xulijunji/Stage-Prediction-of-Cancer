@@ -148,9 +148,12 @@ plotPCA = function(object, intgroup, ntop=500, returnData=FALSE, title, colData 
   }
   
   ggplot(data=d, aes_string(x="PC1", y="PC2", color="group", shape="group")) + geom_point(size=3) + 
-    ggtitle(title)+theme(plot.title = element_text(hjust = 0.5, size = 10 )) +
-    xlab(paste0("PC1: ",round(percentVar[1] * 100),"% variance")) +
+    ggtitle(title)+theme(plot.title = element_text(hjust = 0.5, size = 15 )) +
+    xlab(paste0("PC1: ",round(percentVar[1] * 100),"% variance")) + 
+    theme(axis.text.x = element_text(size = 12), axis.title.x = element_text(size = 14)) +
     ylab(paste0("PC2: ",round(percentVar[2] * 100),"% variance")) +
+    theme(axis.text.y = element_text(size = 12), axis.title.y = element_text(size = 14)) +
+
     coord_fixed() 
 }
 
