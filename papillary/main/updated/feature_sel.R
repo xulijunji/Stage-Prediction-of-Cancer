@@ -161,3 +161,12 @@ get.class.fea <- function(net.fea)
 }
 
 #net.features.trial.gr <- get.features(vst_tumor_tum, stages.levels.comb, train.trial.ind)
+
+genes.varselRf.atleast3 <- data.frame(genes = net.features.trial$varSelRF$atleast_3,
+                            fold = net.features.trial$)
+library(dplyr)
+folds <- rowMeans(data.frame(lapply(seq(4), function(i)
+  {
+  net.features.trial$deseq2$genes.object[[i]][net.features.trial$varSelRF$atleast_3, 2]  
+})))
+  
